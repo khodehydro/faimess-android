@@ -76,3 +76,4 @@ git show --stat HEAD
 - **رنگ:** `Color.kt` با نام‌های همان سایت بازنویسی شد؛ نگاشت قدیمی→جدید: Lime→Primary، Ink→Ink جدید، MutedInk→InkMuted، FeedBackground→Canvas، SoftSurface→Subtle، Leaf→PrimaryDeep، HeartRed→Heart (rose سایت) و خطاها→FlameDeep.
 - **نام:** `app_name`، تم‌ها، کلاس‌ها، تست UI و اسکریپت CI.
 - **بررسی:** PNGهای تولیدشده با رمزگشایی مستقل بررسی و پیش‌نمایش ترکیب‌شده روی بنفش با ماسک دایره دیده شد. محیط Java/SDK ندارد؛ نتیجهٔ build و lint باید از CI همین شاخه (`arena/4ab96fac-faimess-android`) خوانده شود.
+- **اصلاح CI موروثی:** اجرای CI همین شاخه (`38569013341`) نشان داد اپ، تست‌های واحد و `assembleDebug` موفق‌اند ولی `compileDebugAndroidTestKotlin` به‌خاطر import نامعتبر `androidx.compose.ui.test.onAllNodes` (که از نسخهٔ 0.1.1 مانده بود و در اجرای `38565371823` شاخهٔ قبلی هم با همان خطا شکست خورده بود) خطا می‌دهد. `onAllNodes` عضو خودِ `ComposeTestRule` است و import لازم ندارد؛ خط import حذف شد.
