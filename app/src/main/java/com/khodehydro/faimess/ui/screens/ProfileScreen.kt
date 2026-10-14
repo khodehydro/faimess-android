@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,8 +39,8 @@ import com.khodehydro.faimess.ui.theme.MutedInk
 @Composable
 fun ProfileScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier: Modifier = Modifier) {
     var savedOnly by rememberSaveable { mutableStateOf(false) }
-    val myPosts = posts.filter { it.author.id == DemoContent.me.id }
-    val saved = posts.filter { it.isSaved }
+    val myPosts = remember(posts) { posts.filter { it.author.id == DemoContent.me.id } }
+    val saved = remember(posts) { posts.filter { it.isSaved } }
     val visible = if (savedOnly) saved else myPosts
     LazyColumn(
         modifier = modifier.testTag("profile_screen"),
@@ -75,6 +76,6 @@ fun ProfileScreen(posts: List<FeedPost>, interactions: PostInteractions, modifie
                 EmptyState(R.drawable.ic_bookmark, stringResource(R.string.no_saved), stringResource(R.string.no_saved_description))
             }
         }
-        items(visible, key = { it.id }) { post -> PostCard(post, interactions) }
+        items(visible, key = { it.id }, contentType = { "post" }) { post -> PostCard(post, interactions) }
     }
 }

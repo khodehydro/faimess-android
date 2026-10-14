@@ -61,6 +61,34 @@ class FeedViewModelTest {
         assertFalse(viewModel.addComment("sienna-ridge", "One too many"))
     }
 
+    @Test fun `rapid like and save taps update immediately without losing events`() {
+        val handle = SavedStateHandle()
+        val viewModel = FeedViewModel(handle)
+        repeat(101) { index ->
+            viewModel.toggleLike("sienna-ridge")
+            viewModel.toggleSave("sienna-ridge")
+            val post = viewModel.uiState.value.posts.first()
+            assertEquals(index % 2 == 1, post.isLiked)
+            assertEquals(if (post.isLiked) 26_000 else 25_999, post.likes)
+            assertEquals(index % 2 == 0, post.isSaved)
+        }
+        val restored = FeedViewModel(SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        assertEquals(viewModel.uiState.value, restored.uiState.value)
+    }
+
+    @Test fun `engagement changes keep unrelated posts stories and media inputs unchanged`() {
+        val viewModel = FeedViewModel(SavedStateHandle())
+        val before = viewModel.uiState.value
+        viewModel.toggleLike("sienna-ridge")
+        val after = viewModel.uiState.value
+        assertSame(before.stories, after.stories)
+        assertSame(before.posts[1], after.posts[1])
+        assertSame(before.posts[2], after.posts[2])
+        assertSame(before.posts.first().author, after.posts.first().author)
+        assertSame(before.posts.first().caption, after.posts.first().caption)
+        assertEquals(before.posts.first().image, after.posts.first().image)
+    }
+
     @Test fun `empty stories cannot replace the current story`() {
         val viewModel = FeedViewModel(SavedStateHandle())
         val before = viewModel.uiState.value.stories

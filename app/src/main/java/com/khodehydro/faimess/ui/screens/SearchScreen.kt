@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,7 +39,7 @@ import com.khodehydro.faimess.ui.theme.MutedInk
 fun SearchScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier: Modifier = Modifier) {
     var query by rememberSaveable { mutableStateOf("") }
     val keyboard = LocalSoftwareKeyboardController.current
-    val results = FeedActions.search(posts, query)
+    val results = remember(posts, query) { FeedActions.search(posts, query) }
     Column(modifier = modifier.testTag("search_screen")) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.search_title), style = MaterialTheme.typography.headlineSmall)
@@ -69,7 +70,7 @@ fun SearchScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier
             if (results.isEmpty()) {
                 item { EmptyState(R.drawable.ic_search, stringResource(R.string.no_results), stringResource(R.string.no_results_description)) }
             }
-            items(results, key = { it.id }) { post -> PostCard(post, interactions) }
+            items(results, key = { it.id }, contentType = { "post" }) { post -> PostCard(post, interactions) }
         }
     }
 }

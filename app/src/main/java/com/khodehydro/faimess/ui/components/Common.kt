@@ -1,7 +1,6 @@
 package com.khodehydro.faimess.ui.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,9 +40,9 @@ fun AppIcon(
 
 @Composable
 fun Avatar(person: Person, size: Dp, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(person.avatar),
-        contentDescription = null,
+    OfflinePhoto(
+        resource = person.avatar,
+        description = null,
         contentScale = ContentScale.Crop,
         modifier = modifier.size(size).clip(CircleShape),
     )

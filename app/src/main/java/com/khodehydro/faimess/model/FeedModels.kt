@@ -1,9 +1,12 @@
 package com.khodehydro.faimess.model
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class Person(val id: String, val name: String, @DrawableRes val avatar: Int)
 
+@Immutable
 data class Story(
     val person: Person,
     @DrawableRes val image: Int,
@@ -12,6 +15,7 @@ data class Story(
     val isLive: Boolean = false,
 )
 
+@Immutable
 data class FeedComment(val author: String, val body: String)
 
 data class FeedPost(

@@ -2,7 +2,8 @@ package com.khodehydro.faimess.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,18 +26,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -60,58 +60,60 @@ import com.khodehydro.faimess.ui.theme.Leaf
 import com.khodehydro.faimess.ui.theme.MutedInk
 import com.khodehydro.faimess.ui.theme.SoftSurface
 
+/** Events carry stable IDs, never a potentially stale snapshot of a post's engagement state. */
+@Immutable
 data class PostInteractions(
-    val onLike: (FeedPost) -> Unit,
-    val onComments: (FeedPost) -> Unit,
-    val onShare: (FeedPost) -> Unit,
-    val onOptions: (FeedPost) -> Unit,
-    val onMedia: (FeedPost) -> Unit,
+    val onLike: (String) -> Unit,
+    val onComments: (String) -> Unit,
+    val onShare: (String) -> Unit,
+    val onOptions: (String) -> Unit,
+    val onMedia: (String) -> Unit,
     val onAuthor: (Person) -> Unit,
+)
+
+@Immutable
+private data class PostClickActions(
+    val like: () -> Unit,
+    val comments: () -> Unit,
+    val share: () -> Unit,
+    val options: () -> Unit,
+    val media: () -> Unit,
+    val author: () -> Unit,
 )
 
 @Composable
 fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier = Modifier) {
+    val postId = post.id
+    val author = post.author
+    val clicks = remember(postId, author, interactions) {
+        PostClickActions(
+            like = { interactions.onLike(postId) },
+            comments = { interactions.onComments(postId) },
+            share = { interactions.onShare(postId) },
+            options = { interactions.onOptions(postId) },
+            media = { interactions.onMedia(postId) },
+            author = { interactions.onAuthor(author) },
+        )
+    }
     Surface(
-        modifier = modifier.fillMaxWidth().testTag("post_${post.id}"),
+        modifier = modifier.fillMaxWidth().testTag("post_$postId"),
         shape = RoundedCornerShape(27.dp),
         color = Color.White,
     ) {
         Column(Modifier.padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 3.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    Modifier.weight(1f).heightIn(min = 48.dp)
-                        .clickable(role = Role.Button, onClick = { interactions.onAuthor(post.author) }),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Avatar(post.author, 36.dp)
-                    Spacer(Modifier.width(9.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(post.author.name, style = MaterialTheme.typography.titleSmall, color = Ink)
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            Text(post.time, style = MaterialTheme.typography.bodySmall, color = MutedInk)
-                            AppIcon(R.drawable.ic_globe, stringResource(R.string.public_post), Modifier.size(10.dp), Ink)
-                        }
-                    }
-                }
-                IconButton(onClick = { interactions.onOptions(post) }, modifier = Modifier.size(48.dp)) {
-                    AppIcon(
-                        R.drawable.ic_more,
-                        stringResource(R.string.post_options, post.author.name),
-                        Modifier.size(16.dp),
-                        MutedInk,
-                    )
-                }
-            }
+            // Header, caption and media only receive the fields they render. A like/comment update
+            // can recompose the footer without rebuilding these more expensive, unchanged children.
+            PostAuthorHeader(author, post.time, clicks.author, clicks.options)
             Spacer(Modifier.height(9.dp))
-            ExpandableCaption(post.caption, post.id)
+            ExpandableCaption(post.caption, postId)
             Spacer(Modifier.height(13.dp))
-            PostMedia(post, onClick = { interactions.onMedia(post) })
+            PostMedia(postId, post.image, post.imageDescription, post.isVideoPreview, clicks.media)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val likeDescription = stringResource(
-                    if (post.isLiked) R.string.unlike_post else R.string.like_post, post.author.name,
+                    if (post.isLiked) R.string.unlike_post else R.string.like_post, author.name,
                 )
                 val likeState = stringResource(R.string.likes_state, post.likes)
                 EngagementButton(
@@ -119,22 +121,22 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
                     label = compactCount(post.likes),
                     description = likeDescription,
                     iconColor = if (post.isLiked) HeartRed else Ink,
-                    onClick = { interactions.onLike(post) },
-                    modifier = Modifier.testTag("like_${post.id}").semantics { stateDescription = likeState },
+                    onClick = clicks.like,
+                    modifier = Modifier.testTag("like_$postId").semantics { stateDescription = likeState },
                 )
                 Spacer(Modifier.width(4.dp))
                 EngagementButton(
                     icon = R.drawable.ic_comment,
                     label = compactCount(post.commentCount),
-                    description = stringResource(R.string.post_comments, post.author.name),
-                    onClick = { interactions.onComments(post) },
+                    description = stringResource(R.string.post_comments, author.name),
+                    onClick = clicks.comments,
                 )
                 Spacer(Modifier.weight(1f))
                 EngagementButton(
                     icon = R.drawable.ic_send,
                     label = compactCount(post.shares),
-                    description = stringResource(R.string.share_post, post.author.name),
-                    onClick = { interactions.onShare(post) },
+                    description = stringResource(R.string.share_post, author.name),
+                    onClick = clicks.share,
                     iconAfterText = true,
                 )
             }
@@ -143,18 +145,47 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
 }
 
 @Composable
-private fun PostMedia(post: FeedPost, onClick: () -> Unit) {
+private fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit, onOptions: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.weight(1f).heightIn(min = 48.dp).clickable(role = Role.Button, onClick = onAuthor),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Avatar(author, 36.dp)
+            Spacer(Modifier.width(9.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(author.name, style = MaterialTheme.typography.titleSmall, color = Ink)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(time, style = MaterialTheme.typography.bodySmall, color = MutedInk)
+                    AppIcon(R.drawable.ic_globe, stringResource(R.string.public_post), Modifier.size(10.dp), Ink)
+                }
+            }
+        }
+        IconButton(onClick = onOptions, modifier = Modifier.size(48.dp)) {
+            AppIcon(R.drawable.ic_more, stringResource(R.string.post_options, author.name), Modifier.size(16.dp), MutedInk)
+        }
+    }
+}
+
+@Composable
+private fun PostMedia(
+    postId: String,
+    @DrawableRes image: Int,
+    imageDescription: String,
+    isVideoPreview: Boolean,
+    onClick: () -> Unit,
+) {
     val description = stringResource(
-        if (post.isVideoPreview) R.string.video_preview_description else R.string.photo_preview_description,
-        post.imageDescription,
+        if (isVideoPreview) R.string.video_preview_description else R.string.photo_preview_description,
+        imageDescription,
     )
     Box(
         modifier = Modifier.fillMaxWidth().aspectRatio(1.4f).clip(RoundedCornerShape(21.dp))
             .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = description }
-            .testTag("media_${post.id}"),
+            .testTag("media_$postId"),
     ) {
-        Image(painterResource(post.image), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
-        if (post.isVideoPreview) {
+        OfflinePhoto(image, null, Modifier.matchParentSize())
+        if (isVideoPreview) {
             Box(
                 Modifier.align(Alignment.Center).size(49.dp).background(Color.White.copy(alpha = 0.25f), CircleShape),
                 contentAlignment = Alignment.Center,
@@ -180,7 +211,7 @@ private fun EngagementButton(
     iconColor: Color = Ink,
     iconAfterText: Boolean = false,
 ) {
-    // A 48dp hit target surrounds the smaller visual pill from the reference.
+    // Retain standard accessible click/ripple and drag cancellation, with a 48dp hit target.
     Box(
         modifier = modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
             .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = description },
@@ -206,7 +237,9 @@ private fun ExpandableCaption(caption: String, postId: String) {
     val more = stringResource(R.string.more_caption)
     val less = stringResource(R.string.less_caption)
     val measurer = rememberTextMeasurer()
-    BoxWithConstraints(Modifier.fillMaxWidth().animateContentSize()) {
+    BoxWithConstraints(
+        Modifier.fillMaxWidth().animateContentSize(tween(durationMillis = 120, easing = FastOutSlowInEasing)),
+    ) {
         val width = constraints.maxWidth
         val collapsed = remember(caption, width, style, more, measurer) {
             fun fits(text: AnnotatedString) = !measurer.measure(

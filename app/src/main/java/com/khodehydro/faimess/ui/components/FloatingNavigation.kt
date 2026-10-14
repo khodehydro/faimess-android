@@ -3,6 +3,8 @@ package com.khodehydro.faimess.ui.components
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -59,7 +61,9 @@ fun FloatingNavigation(selected: FeedTab, onSelect: (FeedTab) -> Unit, modifier:
         FeedTab.entries.forEach { tab ->
             val isSelected = selected == tab
             val background by animateColorAsState(
-                if (isSelected) Lime else Color.White.copy(alpha = 0.15f), label = "tabColor",
+                if (isSelected) Lime else Color.White.copy(alpha = 0.15f),
+                animationSpec = tween(durationMillis = 90, easing = LinearEasing),
+                label = "tabColor",
             )
             val label = stringResource(tab.label)
             Box(

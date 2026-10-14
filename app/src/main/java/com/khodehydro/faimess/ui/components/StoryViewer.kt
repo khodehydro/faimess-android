@@ -1,6 +1,5 @@
 package com.khodehydro.faimess.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -76,7 +74,7 @@ fun StoryViewer(stories: List<Story>, initialPersonId: String, onDismiss: () -> 
                 }
             }
             Box(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
-                Image(painterResource(story.image), story.caption, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                OfflinePhoto(story.image, story.caption, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)))))
                 Text(
                     story.caption,

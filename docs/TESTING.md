@@ -9,13 +9,13 @@ JDK 17, Android SDK 35, a working internet connection for the **first build**, a
 macOS / Linux:
 
 ```bash
-./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest :app:assemblePerformance
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\gradlew.bat --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+.\gradlew.bat --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest :app:assemblePerformance
 ```
 
 With an emulator or Android 8+ device connected:
@@ -62,6 +62,7 @@ Open a successful run and look under **Artifacts**:
 | Artifact | Contents |
 | --- | --- |
 | `frindle-debug-apk` | Installable debug `app-debug.apk` |
+| `frindle-performance-apk` | Optimized, non-debuggable, debug-signed local test `app-performance.apk` |
 | `verification-reports` | Unit tests and lint HTML reports |
 | `device-test-reports` | Instrumented Compose test reports |
 | `app-screenshots` | Actual rendered Compose home screenshot |
@@ -81,3 +82,11 @@ Artifacts are temporary GitHub Actions downloads, not version-controlled build o
 ## Validation transparency
 
 The development sandbox does not include Java, an Android SDK or an emulator, and its network cannot fetch Google Maven directly. A successful static check in that environment is **not** an Android build. CI is the source for compile/test results; the development log records the observed run status separately.
+
+## Responsiveness regression checks
+
+Version 0.1.1 adds rapid like/save state tests, latest-only Snackbar tests, batched touch input, navigation/state checks and an actual memory-cache reuse test for the bundled scenery. These are correctness tests, not a measured claim of touch latency or FPS.
+
+Screenshot capture now waits for the asynchronous photos and uses the test automation shell to save `/sdcard/Download/frindle-screenshots/home.png`, which survives APK cleanup. This is test-only; the normal app does not take screenshots or require storage permissions. `.github/scripts/run-device-tests.sh` preserves test failures and publishes their log tail as a check annotation.
+
+Use the [performance guide](PERFORMANCE.md) to compare on a real device without the debugger.

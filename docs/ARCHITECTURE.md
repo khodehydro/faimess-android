@@ -2,7 +2,7 @@
 
 ## Stack
 
-One Android application module, Kotlin, Compose Material 3, an Activity, a lifecycle-aware ViewModel, StateFlow and SavedStateHandle. No backend, DI framework, WebView, runtime image loader or extra permissions are needed for the reference milestone.
+One Android application module, Kotlin, Compose Material 3, an Activity, a lifecycle-aware ViewModel, StateFlow and SavedStateHandle. Coil loads bundled photos asynchronously into a shared memory cache; all image requests use local resource IDs. No backend, DI framework, WebView or extra permissions are needed.
 
 ## Source map
 
@@ -15,6 +15,7 @@ app/src/main/
 │   ├── model/FeedModels.kt             # Immutable models, pure transformations, counters
 │   └── ui/
 │       ├── FeedViewModel.kt            # Local mutations and small saved-state snapshots
+│       ├── LatestSnackbar.kt           # Latest feedback wins; no stale message queue
 │       ├── FrindleApp.kt               # App shell, navigation, overlays, Android sharing
 │       ├── components/
 │       │   ├── AppHeader.kt
@@ -61,3 +62,7 @@ app/src/main/
 | Translate/add RTL or dark theme | New resources, direction-aware layouts, explicit alternate theme and screenshots |
 
 Avoid carrying the demo's drawable resource IDs into future network-domain models: a production media model should represent local and remote sources explicitly. Keep transport, authentication and persistence outside composables.
+
+## Responsiveness changes (0.1.1)
+
+`components/OfflinePhoto.kt` centralizes asynchronous local-image loading and shared cache sizing. `PostInteractions` is remembered by the app and carries IDs, while a post's header, caption and media receive narrowly scoped inputs. `LatestSnackbar` cancels superseded feedback, not actions. See [PERFORMANCE.md](PERFORMANCE.md) for the optional optimized build and honest on-device measurement guidance.

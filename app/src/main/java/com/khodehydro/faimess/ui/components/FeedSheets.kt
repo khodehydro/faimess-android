@@ -1,6 +1,5 @@
 package com.khodehydro.faimess.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
@@ -133,8 +131,8 @@ private fun Composer(isStory: Boolean, onPublish: (String) -> Boolean) {
             shape = RoundedCornerShape(18.dp),
             supportingText = { Text(stringResource(R.string.character_count, draft.length, FeedActions.MAX_CAPTION_LENGTH)) },
         )
-        Image(
-            painterResource(R.drawable.forest_lake),
+        OfflinePhoto(
+            R.drawable.forest_lake,
             stringResource(R.string.photo_demo_note),
             Modifier.fillMaxWidth().aspectRatio(2.4f).clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop,
@@ -224,8 +222,8 @@ private fun Notifications(onPerson: (Person) -> Unit) {
 @Composable
 private fun MediaPreview(post: FeedPost) {
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Image(
-            painterResource(post.image), post.imageDescription,
+        OfflinePhoto(
+            post.image, post.imageDescription,
             Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(24.dp)),
             contentScale = ContentScale.Crop,
         )

@@ -26,12 +26,14 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       # GitHub's Ubuntu runner already includes an Android SDK and accepted licenses.
       # Avoid installing the obsolete Android "tools" package via setup-android.
       - name: Verify, test and assemble
         run: |
           set +e
-          ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest 2>&1 | tee gradle-output.log
+          ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest :app:assemblePerformance 2>&1 | tee gradle-output.log
           result=${PIPESTATUS[0]}
           if [ "$result" -ne 0 ]; then
             python3 - <<'PYLOG'
@@ -47,6 +49,11 @@ jobs:
         with:
           name: frindle-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload optimized on-device test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: frindle-performance-apk
+          path: app/build/outputs/apk/performance/app-performance.apk
       - name: Upload verification reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,6 +77,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -83,16 +92,15 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: |
-            ./gradlew --no-daemon :app:connectedDebugAndroidTest
-            mkdir -p screenshots
-            adb pull /sdcard/Android/data/com.khodehydro.faimess/files/screenshots/. screenshots/
+          script: bash .github/scripts/run-device-tests.sh
       - name: Upload UI test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: device-test-reports
-          path: app/build/reports/androidTests/connected/
+          path: |
+            app/build/reports/androidTests/connected/
+            device-test-output.log
           if-no-files-found: ignore
       - name: Upload actual app screenshots
         if: always()

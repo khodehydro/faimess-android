@@ -1,7 +1,6 @@
 package com.khodehydro.faimess
 
-import android.graphics.Bitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
+import android.os.ParcelFileDescriptor
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -9,13 +8,14 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onAllNodes
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -23,7 +23,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import java.io.File
+import com.khodehydro.faimess.ui.components.PhotoReady
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +49,31 @@ class FrindleUiTest {
         compose.activityRule.scenario.recreate()
         compose.onNodeWithTag("like_sienna-ridge")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "25999 likes"))
+    }
+
+    @Test fun rapidTapsDoNotDropLikeActions() {
+        compose.onNodeWithTag("like_sienna-ridge").performTouchInput {
+            repeat(7) {
+                click()
+                advanceEventTime(40)
+            }
+        }
+        compose.onNodeWithTag("like_sienna-ridge")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "25999 likes"))
+            .performClick()
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "26000 likes"))
+    }
+
+    @Test fun navigatingAwayAfterALikeKeepsTheLatestPostState() {
+        compose.onNodeWithTag("like_sienna-ridge").performClick()
+        compose.onNodeWithTag("nav_discover").performClick()
+        compose.onNodeWithTag("nav_home").performClick()
+        compose.onNodeWithTag("like_sienna-ridge")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "25999 likes"))
+        compose.onNodeWithContentDescription("Options for Sienna’s post").performClick()
+        compose.onNodeWithTag("save_post").performClick()
+        compose.onNodeWithContentDescription("Options for Sienna’s post").performClick()
+        compose.onNodeWithText("Remove from saved").assertIsDisplayed()
     }
 
     @Test fun storyOpensAndCanBeDismissed() {
@@ -113,12 +139,19 @@ class FrindleUiTest {
 
     @Test fun captureReferenceHomeScreenshot() {
         compose.onNodeWithTag("media_sienna-ridge").assertIsDisplayed()
-        compose.waitForIdle()
-        val target = InstrumentationRegistry.getInstrumentation().targetContext
-        val directory = requireNotNull(target.getExternalFilesDir("screenshots"))
-        directory.mkdirs()
-        File(directory, "home.png").outputStream().use { stream ->
-            compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream)
+        // Compose becoming idle does not imply that background bitmap decoding has finished.
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(SemanticsMatcher.expectValue(PhotoReady, false), useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
         }
+        compose.waitForIdle()
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        // Test-only shell capture survives AGP uninstall/cleanup; the app itself needs no permission.
+        val result = automation.executeShellCommand(
+            "mkdir -p /sdcard/Download/frindle-screenshots && " +
+                "screencap -p /sdcard/Download/frindle-screenshots/home.png && echo saved",
+        )
+        val output = ParcelFileDescriptor.AutoCloseInputStream(result).bufferedReader().use { it.readText() }
+        assertEquals("saved", output.trim())
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import com.khodehydro.faimess.ui.components.FeedSheet
 import com.khodehydro.faimess.ui.components.FeedTab
 import com.khodehydro.faimess.ui.components.FloatingNavigation
 import com.khodehydro.faimess.ui.components.PostInteractions
+import com.khodehydro.faimess.ui.components.PreloadFeedPhotos
 import com.khodehydro.faimess.ui.components.StoryViewer
 import com.khodehydro.faimess.ui.screens.CalendarScreen
 import com.khodehydro.faimess.ui.screens.DiscoverScreen
@@ -63,6 +65,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
+    PreloadFeedPhotos()
     val state by feedViewModel.uiState.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(FeedTab.Home) }
     var sheet by rememberSaveable { mutableStateOf<FeedSheet?>(null) }
@@ -72,10 +75,11 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val feedback = remember(snackbar, scope) { LatestSnackbar(snackbar, scope) }
 
-    fun notify(messageId: Int) { scope.launch { snackbar.showSnackbar(context.getString(messageId)) } }
-    fun openPost(destination: FeedSheet, post: FeedPost) {
-        activePostId = post.id
+    fun notify(messageId: Int) { feedback.show(context.getString(messageId)) }
+    fun openPost(destination: FeedSheet, postId: String) {
+        activePostId = postId
         sheet = destination
     }
     fun openPerson(person: Person) {
@@ -86,14 +90,18 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
         if (!sharePost(context, post)) notify(R.string.share_unavailable)
     }
 
-    val interactions = PostInteractions(
-        onLike = { feedViewModel.toggleLike(it.id) },
-        onComments = { openPost(FeedSheet.Comments, it) },
-        onShare = ::share,
-        onOptions = { openPost(FeedSheet.PostMenu, it) },
-        onMedia = { openPost(FeedSheet.Media, it) },
-        onAuthor = ::openPerson,
-    )
+    // These handlers only capture the ViewModel, context and stable MutableState delegates.
+    // Reuse them across likes, comments, overlays and tab changes so unchanged cards can skip work.
+    val interactions = remember(feedViewModel, context, feedback) {
+        PostInteractions(
+            onLike = feedViewModel::toggleLike,
+            onComments = { openPost(FeedSheet.Comments, it) },
+            onShare = { postId -> feedViewModel.uiState.value.posts.find { it.id == postId }?.let(::share) },
+            onOptions = { openPost(FeedSheet.PostMenu, it) },
+            onMedia = { openPost(FeedSheet.Media, it) },
+            onAuthor = ::openPerson,
+        )
+    }
 
     BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null) { tab = FeedTab.Home }
 
@@ -122,7 +130,7 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
                     sheet = null
                     tab = FeedTab.Home
                     if (isStory) storyPersonId = DemoContent.me.id
-                    else scope.launch { homeListState.animateScrollToItem(0) }
+                    else scope.launch { homeListState.scrollToItem(0) }
                     notify(if (isStory) R.string.published_story else R.string.published_post)
                 }
                 published
@@ -136,7 +144,7 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
                 sheet = null
             },
             onShare = { sheet = null; activePost?.let(::share) },
-            onPerson = ::openPerson,
+            onPerson = interactions.onAuthor,
         )
     }
     storyPersonId?.let { id ->
@@ -158,7 +166,12 @@ private fun FrindleScaffold(
     snackbar: SnackbarHostState,
 ) {
     val screenState = rememberSaveableStateHolder()
-    val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val ime = WindowInsets.ime
+    val density = LocalDensity.current
+    // Insets change on every keyboard-animation frame; only visibility affects the chrome.
+    val keyboardVisible by remember(ime, density) {
+        derivedStateOf { ime.getBottom(density) > 0 }
+    }
     Box(
         modifier = Modifier.fillMaxSize().background(Color.White)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
