@@ -1,0 +1,26 @@
+# Local Android / Gradle configuration
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+**/build/
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Signing and generated packages (never commit credentials)
+*.jks
+*.keystore
+keystore.properties
+*.apk
+*.aab
+
+# High-resolution source assets; optimized offline assets live in res/
+design-assets/
+
+# Local tooling and operating systems
+.venv/
+__pycache__/
+.DS_Store
+Thumbs.db

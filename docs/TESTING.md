@@ -1,0 +1,83 @@
+# Build and verification
+
+## Prerequisites
+
+JDK 17, Android SDK 35, a working internet connection for the **first build**, and the checked-in Gradle Wrapper. Android Studio setup and clone instructions are in the root README. The app itself does not need internet.
+
+## Local verification
+
+macOS / Linux:
+
+```bash
+./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+```
+
+Windows PowerShell:
+
+```powershell
+.\gradlew.bat --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+```
+
+With an emulator or Android 8+ device connected:
+
+```bash
+./gradlew :app:connectedDebugAndroidTest
+```
+
+Use `gradlew.bat` instead on Windows. Tests are under `app/src/test` and `app/src/androidTest`.
+
+## Coverage
+
+### Unit tests
+
+- Immutable/reversible likes and saved posts, non-negative counts.
+- Comment whitespace/length validation and count updates.
+- Compact label boundaries and case-insensitive author/caption search.
+- Initial offline fixtures; publish ordering and validation.
+- State reconstruction from a new SavedStateHandle.
+- Unknown IDs, bounded local post/comment storage, invalid story input.
+
+### Instrumented Compose tests
+
+- Reference launch elements and selected Home tab.
+- Like interaction and Activity recreation.
+- Story open, next and close.
+- Comment entry and blank-input prevention.
+- Publish flow and blank-input prevention.
+- Saving and retrieving a post from Profile.
+- All five navigation destinations.
+- Search empty state and clearing the query.
+- Explicit still-image video-preview behavior.
+- Capture of the actual rendered home screen (`home.png`).
+
+## GitHub Actions
+
+[Android CI](https://github.com/khodehydro/faimess-android/actions/workflows/android.yml) runs on pushes to `main` and `arena/**`, pull requests targeting `main`, and manual dispatch.
+
+1. **Build, unit tests & lint** verifies the wrapper, installs the toolchain, compiles the app/tests, runs unit tests and Android Lint, and uploads the debug APK and reports.
+2. **Compose device tests & screenshot** runs on an Android 15 / API 35 emulator after the build job, and uploads device-test reports and app screenshots.
+
+Open a successful run and look under **Artifacts**:
+
+| Artifact | Contents |
+| --- | --- |
+| `frindle-debug-apk` | Installable debug `app-debug.apk` |
+| `verification-reports` | Unit tests and lint HTML reports |
+| `device-test-reports` | Instrumented Compose test reports |
+| `app-screenshots` | Actual rendered Compose home screenshot |
+
+Artifacts are temporary GitHub Actions downloads, not version-controlled build outputs or a signed production release. A GitHub sign-in may be required to download them.
+
+## Manual visual review
+
+- Compare the launch screen to the user's reference at approximately 393 dp width.
+- Scroll through posts and horizontally through stories; verify the bottom bar overlays rather than displaces the feed.
+- Try gesture navigation and three-button navigation; no content controls should sit under system bars.
+- Try 320 dp width, a wide device, landscape, and larger font scale. Scroll when content does not fit.
+- Open input sheets with the keyboard visible; verify their controls and Back behavior.
+- Turn on airplane mode: all reference imagery and type remain available.
+- In Android Studio, open the three `ReferenceFeedPreview` configurations.
+
+## Validation transparency
+
+The development sandbox does not include Java, an Android SDK or an emulator, and its network cannot fetch Google Maven directly. A successful static check in that environment is **not** an Android build. CI is the source for compile/test results; the development log records the observed run status separately.
