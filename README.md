@@ -88,7 +88,7 @@ studio .
 | Minimum SDK | 26 / Android 8.0 |
 | Application ID | `com.khodehydro.faimess` |
 
-در **SDK Manager** پلتفرم Android 15 / API 35 و Build Tools پیشنهادی را نصب کنید. در **Settings → Build, Execution, Deployment → Build Tools → Gradle**، Gradle JDK را روی **JDK 17** قرار دهید. Wrapper با پروژه آمده است؛ Gradle جداگانه لازم نیست. اولین Sync برای دریافت وابستگی‌های Google Maven، Maven Central و Gradle به اینترنت نیاز دارد؛ خود اپ در زمان اجرا آفلاین است.
+در **SDK Manager** پلتفرم Android 15 / API 35 و Build Tools پیشنهادی را نصب کنید. در **Settings → Build, Execution, Deployment → Build Tools → Gradle**، Gradle JDK را روی **JDK 17** قرار دهید. Wrapper با پروژه آمده است؛ Gradle جداگانه لازم نیست. اولین Sync برای دریافت Gradle و وابستگی‌ها به اینترنت نیاز دارد؛ میرور مایکت اولویت اول مخزن‌های پلاگین و کتابخانه است و Wrapper نیز از مایکت دانلود می‌شود. منابع رسمی برای artifactهای پیدا‌نشده بعد از میرور باقی مانده‌اند. خود اپ در زمان اجرا آفلاین است. جزئیات و دستورات دریافت تغییرات در [راهنمای مایکت](docs/MYKET_MIRROR.md) آمده است.
 
 `local.properties` و مسیر SDK مختص سیستم شما هستند و عمداً در Git نیستند؛ Android Studio آن‌ها را تنظیم می‌کند.
 
