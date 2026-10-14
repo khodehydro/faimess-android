@@ -5,29 +5,42 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val ReferenceColors = lightColorScheme(
-    primary = Lime,
-    onPrimary = Ink,
-    primaryContainer = SoftSurface,
-    onPrimaryContainer = Ink,
-    secondary = Leaf,
+private val FaimessColors = lightColorScheme(
+    primary = Primary,
+    onPrimary = Color.White,
+    primaryContainer = PrimarySoft,
+    onPrimaryContainer = PrimaryDeep,
+    secondary = Teal,
     onSecondary = Color.White,
-    background = FeedBackground,
+    secondaryContainer = TealSoft,
+    onSecondaryContainer = TealDeep,
+    tertiary = Flame,
+    onTertiary = Color.White,
+    tertiaryContainer = FlameSoft,
+    onTertiaryContainer = FlameDeep,
+    background = CanvasBackground,
     onBackground = Ink,
     surface = Color.White,
     onSurface = Ink,
-    onSurfaceVariant = MutedInk,
-    surfaceVariant = SoftSurface,
-    outline = Color(0xFFE4E9DF),
-    error = HeartRed,
+    surfaceVariant = Subtle,
+    onSurfaceVariant = InkMuted,
+    outline = LineStrong,
+    outlineVariant = Line,
+    error = FlameDeep,
+    onError = Color.White,
+    errorContainer = FlameSoft,
+    onErrorContainer = FlameDeep,
 )
 
-/** Intentionally light and non-dynamic: the first milestone matches the supplied reference. */
+/**
+ * The website's light theme, not dynamic colour: the palette is the brand, so it must not change
+ * per device. The site also ships a dark palette; it is not wired here yet.
+ */
 @Composable
-fun FrindleTheme(content: @Composable () -> Unit) {
+fun FaimessTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = ReferenceColors,
-        typography = FrindleTypography,
+        colorScheme = FaimessColors,
+        typography = FaimessTypography,
         content = content,
     )
 }

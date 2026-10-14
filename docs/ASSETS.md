@@ -1,5 +1,11 @@
 # Asset provenance
 
+## Brand mark and launcher icon
+
+`app/src/main/res/drawable-nodpi/brand_logo.png` is a byte-identical copy (SHA-256 `0e93ccce…6c644b`) of `src/assets/brand/faimess-logo.png` from the FAIMESS web repository `khodehydro/faimess-doc` (branch `arena/01a10c49-faimess-doc`, commit `73ae3448`): the white cat on the brand purple `#8267F0`, 150 × 150, flat two-colour artwork. It is the team's own brand asset, shared by the website, its PWA icons and this app.
+
+`app/src/main/res/mipmap-*/ic_launcher_foreground.png` (108 dp at mdpi … xxxhdpi) are not separate drawings: `tools/brand_assets.py` decodes the logo into a coverage field and re-renders the cat alone, with alpha edges, inside the adaptive-icon safe zone. The adaptive icon's background layer and the splash window are the flat `@color/brand_primary`. Re-run the script whenever the logo file changes.
+
 ## Photography
 
 `app/src/main/res/drawable-nodpi/` contains two original AI-generated scenic photographs and six original AI-generated fictional profile portraits created for this UI milestone on 2026-10-14:
@@ -22,7 +28,7 @@ Manrope, Copyright 2020 The Manrope Project Authors, distributed under the SIL O
 
 ## Icons
 
-The small monochrome vector icons and four-lobed logo are authored in project XML using basic geometry. They do not require an icon CDN or an extended icon dependency.
+The small monochrome vector icons are authored in project XML using basic geometry; the first milestone's four-lobed placeholder logo was removed in favour of the brand mark above. They do not require an icon CDN or an extended icon dependency.
 
 ## Gradle Wrapper
 

@@ -35,7 +35,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.Story
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.Lime
+import com.khodehydro.faimess.ui.theme.Primary
 
 @Composable
 fun StoryViewer(stories: List<Story>, initialPersonId: String, onDismiss: () -> Unit) {
@@ -56,7 +56,7 @@ fun StoryViewer(stories: List<Story>, initialPersonId: String, onDismiss: () -> 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 stories.forEachIndexed { segment, _ ->
                     Box(Modifier.weight(1f).height(3.dp).background(
-                        if (segment <= index) Lime else Color.White.copy(alpha = 0.3f), RoundedCornerShape(4.dp),
+                        if (segment <= index) Primary else Color.White.copy(alpha = 0.3f), RoundedCornerShape(4.dp),
                     ))
                 }
             }

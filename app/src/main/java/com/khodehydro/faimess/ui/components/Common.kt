@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.model.Person
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.MutedInk
-import com.khodehydro.faimess.ui.theme.SoftSurface
+import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.Subtle
 
 @Composable
 fun AppIcon(
@@ -61,14 +61,14 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(66.dp).background(SoftSurface, CircleShape), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(66.dp).background(Subtle, CircleShape), contentAlignment = Alignment.Center) {
             AppIcon(icon, modifier = Modifier.size(28.dp), tint = Ink)
         }
         Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Text(
             description,
             style = MaterialTheme.typography.bodyMedium,
-            color = MutedInk,
+            color = InkMuted,
             textAlign = TextAlign.Center,
         )
         action?.invoke()

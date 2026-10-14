@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.ui.components.EmptyState
-import com.khodehydro.faimess.ui.theme.MutedInk
+import com.khodehydro.faimess.ui.theme.InkMuted
 
 @Composable
 fun CalendarScreen(onDiscover: () -> Unit, modifier: Modifier = Modifier) {
@@ -29,7 +29,7 @@ fun CalendarScreen(onDiscover: () -> Unit, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.calendar_title), style = MaterialTheme.typography.headlineLarge)
-        Text(stringResource(R.string.calendar_subtitle), style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+        Text(stringResource(R.string.calendar_subtitle), style = MaterialTheme.typography.bodyMedium, color = InkMuted)
         Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), color = Color.White) {
             EmptyState(
                 R.drawable.ic_calendar,

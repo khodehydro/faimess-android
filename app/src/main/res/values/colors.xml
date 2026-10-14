@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="launcher_background">#8EF20B</color>
+    <!-- FAIMESS brand purple: the website's primary token and the field colour of the logo artwork. -->
+    <color name="brand_primary">#8267F0</color>
+    <color name="launcher_background">@color/brand_primary</color>
 </resources>

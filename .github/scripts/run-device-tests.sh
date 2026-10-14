@@ -17,8 +17,8 @@ fi
 # Test-runner cleanup may uninstall the APK and remove its externalFilesDir. The screenshot
 # test saves into an emulator Downloads folder so the report survives that cleanup.
 mkdir -p screenshots
-if adb shell test -f /sdcard/Download/frindle-screenshots/home.png; then
-    if ! adb pull /sdcard/Download/frindle-screenshots/home.png screenshots/home.png; then
+if adb shell test -f /sdcard/Download/faimess-screenshots/home.png; then
+    if ! adb pull /sdcard/Download/faimess-screenshots/home.png screenshots/home.png; then
         echo "::error title=Screenshot collection failed::Could not pull home.png from the emulator."
         result=1
     fi

@@ -34,8 +34,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.Lime
-import com.khodehydro.faimess.ui.theme.Olive
+import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.Line
+import com.khodehydro.faimess.ui.theme.Primary
 
 enum class FeedTab(@StringRes val label: Int, @DrawableRes val icon: Int) {
     Home(R.string.home, R.drawable.ic_home),
@@ -47,13 +48,15 @@ enum class FeedTab(@StringRes val label: Int, @DrawableRes val icon: Int) {
 
 @Composable
 fun FloatingNavigation(selected: FeedTab, onSelect: (FeedTab) -> Unit, modifier: Modifier = Modifier) {
+    // The site's bottom menu: a translucent white capsule with a wide, faint, untinted shadow;
+    // the active destination is the only thing painted in the brand purple.
     val shape = RoundedCornerShape(50)
     Row(
         modifier = modifier.widthIn(max = 284.dp).fillMaxWidth()
-            .shadow(18.dp, shape, ambientColor = Olive.copy(alpha = 0.18f), spotColor = Ink.copy(alpha = 0.22f))
+            .shadow(18.dp, shape, ambientColor = Ink.copy(alpha = 0.16f), spotColor = Ink.copy(alpha = 0.22f))
             .clip(shape)
-            .background(Brush.verticalGradient(listOf(Color(0xCC98AB69), Color(0xE070843E))))
-            .border(1.dp, Color.White.copy(alpha = 0.28f), shape)
+            .background(Brush.verticalGradient(listOf(Color(0xF2FFFFFF), Color(0xE6FFFFFF))))
+            .border(1.dp, Line, shape)
             .selectableGroup().padding(7.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -61,7 +64,7 @@ fun FloatingNavigation(selected: FeedTab, onSelect: (FeedTab) -> Unit, modifier:
         FeedTab.entries.forEach { tab ->
             val isSelected = selected == tab
             val background by animateColorAsState(
-                if (isSelected) Lime else Color.White.copy(alpha = 0.15f),
+                if (isSelected) Primary else Color.Transparent,
                 animationSpec = tween(durationMillis = 90, easing = LinearEasing),
                 label = "tabColor",
             )
@@ -72,7 +75,7 @@ fun FloatingNavigation(selected: FeedTab, onSelect: (FeedTab) -> Unit, modifier:
                     .semantics { contentDescription = label }.testTag("nav_${tab.name.lowercase()}"),
                 contentAlignment = Alignment.Center,
             ) {
-                AppIcon(tab.icon, modifier = Modifier.size(22.dp), tint = if (isSelected) Ink else Color.White)
+                AppIcon(tab.icon, modifier = Modifier.size(22.dp), tint = if (isSelected) Color.White else InkMuted)
             }
         }
     }

@@ -1,24 +1,25 @@
-# Faimess Android · Frindle UI
+# FAIMESS Android
 
-[![Android CI](https://github.com/khodehydro/faimess-android/actions/workflows/android.yml/badge.svg?branch=arena%2Fce2383fc-faimess-android)](https://github.com/khodehydro/faimess-android/actions/workflows/android.yml)
+[![Android CI](https://github.com/khodehydro/faimess-android/actions/workflows/android.yml/badge.svg?branch=arena%2F4ab96fac-faimess-android)](https://github.com/khodehydro/faimess-android/actions/workflows/android.yml)
 
-نسخهٔ اولیهٔ اپ اندروید با **Kotlin و Jetpack Compose**، با الگوبرداری از تصویر مرجع Frindle. نام و متن‌های انگلیسی، تم سفید/سبز لیمویی و ساختار صفحه فعلاً مطابق مرجع نگه داشته شده‌اند تا در مراحل بعد بر اساس نیازهای محصول تغییر کنند.
+اپ اندروید **FAIMESS** (پلتفرم استریم موسیقی K-pop) با **Kotlin و Jetpack Compose**. هویت بصری — نام، لوگوی گربهٔ سفید روی بنفش و پالت رنگ — مستقیماً از وب‌اپ FAIMESS (`khodehydro/faimess-doc`) گرفته شده است. ساختار صفحه‌ها فعلاً همان اسکلت فید/استوری مرحلهٔ اول است و در مراحل بعد به صفحات موسیقی (پخش، آرتیست، آلبوم، پلی‌لیست) تبدیل می‌شود.
 
-> **شاخهٔ این نسخه:** `arena/ce2383fc-faimess-android`
+> **شاخهٔ این نسخه:** `arena/4ab96fac-faimess-android`
 > تغییرات این مرحله روی این شاخه هستند، نه `main`.
 
 ## آنچه ساخته شده
 
-- هدر Frindle، لوگوی سبز، دکمهٔ انتشار و اعلان‌ها.
-- ردیف افقی استوری با حلقه‌های سبز، نشان افزودن و برچسب LIVE نمایشی.
+- هدر FAIMESS با همان فایل لوگوی سایت (گربهٔ سفید روی بنفش `#8267F0`، گوشهٔ ۳۲٫۵٪)، واژه‌نشان، دکمهٔ انتشار و اعلان‌ها.
+- آیکون لانچر adaptive و اسپلش بنفش برند، هر دو بریده‌شده از همان لوگو (`tools/brand_assets.py`).
+- ردیف افقی استوری با حلقهٔ گرادیان بنفش→فیروزه‌ای سایت، نشان افزودن و برچسب LIVE نمایشی.
 - فید اسکرول‌شونده با کارت‌های گرد، تصویر بزرگ، پیش‌نمایش ویدئو، متن بازشونده، لایک، کامنت و اشتراک‌گذاری.
-- نوار ناوبری شناور نیمه‌شفاف پنج‌دکمه‌ای با حالت انتخاب سبز.
+- نوار ناوبری شناور سفیدِ نیمه‌شفاف پنج‌دکمه‌ای با حالت انتخاب بنفش برند.
 - صفحات سبک Discover، Calendar، Profile و Search برای متصل بودن دکمه‌ها؛ تقویم عمداً وضعیت خالی دارد.
 - استوری قابل مرور، ذخیرهٔ پست، کامنت محلی، انتشار پست/استوری نمونه و اشتراک متن با Share Sheet اندروید.
 - تصاویر و فونت داخل APK؛ اجرای رابط بدون اینترنت و بدون درخواست مجوز.
 - پشتیبانی از edge-to-edge، safe insets، تغییر اندازهٔ صفحه، حالت افقی و بازسازی Activity.
 
-**محدودهٔ نسخه:** این یک نمونهٔ رابط کاربری است، نه شبکهٔ اجتماعی آمادهٔ انتشار. سرور، حساب کاربری، آپلود عکس، اعلان زنده، پخش ویدئو، پخش زنده، دیتابیس دائمی و تقویم واقعی هنوز وجود ندارند. تصاویر نمونهٔ مشابه جایگزین عکس‌های داخل مرجع شده‌اند؛ بازتولید پیکسلی همان عکس‌ها ادعا نمی‌شود. قاب آیفون و Dynamic Island بخشی از اپ اندروید نیستند.
+**محدودهٔ نسخه:** این یک نمونهٔ رابط کاربری با برند FAIMESS است، نه اپ موسیقی آمادهٔ انتشار. سرور، حساب کاربری، آپلود عکس، اعلان زنده، پخش ویدئو، پخش زنده، دیتابیس دائمی و تقویم واقعی هنوز وجود ندارند. تصاویر نمونهٔ مشابه جایگزین عکس‌های داخل مرجع شده‌اند؛ بازتولید پیکسلی همان عکس‌ها ادعا نمی‌شود. قاب آیفون و Dynamic Island بخشی از اپ اندروید نیستند.
 
 ## دریافت مستقیم از GitHub — بدون داشتن پوشهٔ پروژه
 
@@ -36,10 +37,10 @@
 
    ```bash
    git fetch origin
-   git switch --track origin/arena/ce2383fc-faimess-android
+   git switch --track origin/arena/4ab96fac-faimess-android
    ```
 
-   اگر شاخه از قبل محلی است، فقط `git switch arena/ce2383fc-faimess-android` را اجرا کنید.
+   اگر شاخه از قبل محلی است، فقط `git switch arena/4ab96fac-faimess-android` را اجرا کنید.
 5. **Sync Project with Gradle Files** را بزنید و یک دستگاه/امولاتور Android 8.0 یا جدیدتر انتخاب کنید.
 
 ### روش دستوری: کلون مستقیم شاخهٔ آماده
@@ -48,7 +49,7 @@
 
 ```bash
 cd ~
-git clone --branch arena/ce2383fc-faimess-android --single-branch https://github.com/khodehydro/faimess-android.git
+git clone --branch arena/4ab96fac-faimess-android --single-branch https://github.com/khodehydro/faimess-android.git
 cd faimess-android
 ```
 
@@ -129,8 +130,8 @@ app/build/outputs/apk/debug/app-debug.apk
 پس از اولین کلون، در ترمینال همان پروژه اجرا کنید:
 
 ```bash
-git switch arena/ce2383fc-faimess-android
-git pull --ff-only origin arena/ce2383fc-faimess-android
+git switch arena/4ab96fac-faimess-android
+git pull --ff-only origin arena/4ab96fac-faimess-android
 ```
 
 بعد Gradle Sync را اجرا کنید. اگر تغییر محلی دارید، قبل از دریافت آن را commit یا stash کنید؛ از دستورهای حذف‌کننده برای همگام‌سازی استفاده نکنید.

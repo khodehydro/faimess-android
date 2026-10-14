@@ -54,11 +54,11 @@ import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Person
 import com.khodehydro.faimess.model.compactCount
-import com.khodehydro.faimess.ui.theme.HeartRed
+import com.khodehydro.faimess.ui.theme.Heart
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.Leaf
-import com.khodehydro.faimess.ui.theme.MutedInk
-import com.khodehydro.faimess.ui.theme.SoftSurface
+import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.PrimaryDeep
+import com.khodehydro.faimess.ui.theme.Subtle
 
 /** Events carry stable IDs, never a potentially stale snapshot of a post's engagement state. */
 @Immutable
@@ -120,7 +120,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
                     icon = if (post.isLiked) R.drawable.ic_heart else R.drawable.ic_heart_outline,
                     label = compactCount(post.likes),
                     description = likeDescription,
-                    iconColor = if (post.isLiked) HeartRed else Ink,
+                    iconColor = if (post.isLiked) Heart else Ink,
                     onClick = clicks.like,
                     modifier = Modifier.testTag("like_$postId").semantics { stateDescription = likeState },
                 )
@@ -156,13 +156,13 @@ private fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit,
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(author.name, style = MaterialTheme.typography.titleSmall, color = Ink)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(time, style = MaterialTheme.typography.bodySmall, color = MutedInk)
+                    Text(time, style = MaterialTheme.typography.bodySmall, color = InkMuted)
                     AppIcon(R.drawable.ic_globe, stringResource(R.string.public_post), Modifier.size(10.dp), Ink)
                 }
             }
         }
         IconButton(onClick = onOptions, modifier = Modifier.size(48.dp)) {
-            AppIcon(R.drawable.ic_more, stringResource(R.string.post_options, author.name), Modifier.size(16.dp), MutedInk)
+            AppIcon(R.drawable.ic_more, stringResource(R.string.post_options, author.name), Modifier.size(16.dp), InkMuted)
         }
     }
 }
@@ -218,7 +218,7 @@ private fun EngagementButton(
         contentAlignment = Alignment.Center,
     ) {
         Row(
-            modifier = Modifier.background(SoftSurface.copy(alpha = 0.8f), RoundedCornerShape(20.dp))
+            modifier = Modifier.background(Subtle.copy(alpha = 0.8f), RoundedCornerShape(20.dp))
                 .padding(horizontal = 9.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -251,7 +251,7 @@ private fun ExpandableCaption(caption: String, postId: String) {
                 fun candidate(length: Int) = buildAnnotatedString {
                     append(caption.take(length).trimEnd())
                     append(" … ")
-                    withStyle(SpanStyle(color = Leaf, fontWeight = FontWeight.SemiBold)) { append(more) }
+                    withStyle(SpanStyle(color = PrimaryDeep, fontWeight = FontWeight.SemiBold)) { append(more) }
                 }
                 var low = 0
                 var high = caption.length
@@ -266,7 +266,7 @@ private fun ExpandableCaption(caption: String, postId: String) {
         val displayed = if (!expanded) collapsed else buildAnnotatedString {
             append(caption)
             append("  ")
-            withStyle(SpanStyle(color = Leaf, fontWeight = FontWeight.SemiBold)) { append(less) }
+            withStyle(SpanStyle(color = PrimaryDeep, fontWeight = FontWeight.SemiBold)) { append(less) }
         }
         Text(
             text = displayed,

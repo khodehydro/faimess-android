@@ -16,7 +16,7 @@ app/src/main/
 │   └── ui/
 │       ├── FeedViewModel.kt            # Local mutations and small saved-state snapshots
 │       ├── LatestSnackbar.kt           # Latest feedback wins; no stale message queue
-│       ├── FrindleApp.kt               # App shell, navigation, overlays, Android sharing
+│       ├── FaimessApp.kt               # App shell, navigation, overlays, Android sharing
 │       ├── components/
 │       │   ├── AppHeader.kt
 │       │   ├── StoriesRow.kt
@@ -26,10 +26,11 @@ app/src/main/
 │       │   ├── StoryViewer.kt
 │       │   └── Common.kt
 │       ├── screens/                    # Home, Discover, Calendar, Profile, Search
-│       └── theme/                      # Colors, typography, light reference theme
+│       └── theme/                      # FAIMESS palette (Color.kt), typography, light theme
 └── res/
     ├── drawable/                       # Vector icons
-    ├── drawable-nodpi/                 # Offline optimized photos
+    ├── drawable-nodpi/                 # Offline optimized photos + brand_logo.png (the site's mark)
+    ├── mipmap-*/                       # Adaptive launcher foreground cut from the logo (see tools/)
     ├── font/                           # Bundled Manrope
     └── values/                         # Strings and startup theme
 ```
@@ -50,10 +51,10 @@ app/src/main/
 
 | Request | Main location |
 | --- | --- |
-| Change logo/name | `AppHeader.kt`, `strings.xml`, launcher drawables |
-| Adjust visual tokens | `ui/theme/` |
+| Change logo/name | Replace `res/drawable-nodpi/brand_logo.png`, run `python3 tools/brand_assets.py`, edit `app_name` in `strings.xml` |
+| Change brand colours | `ui/theme/Color.kt` (mirrors the web app's `@theme` tokens) and `res/values/colors.xml` |
 | Change post layout | `PostCard.kt` |
-| Add/remove a tab | `FeedTab` in `FloatingNavigation.kt` and `FrindleScaffold` in `FrindleApp.kt` |
+| Add/remove a tab | `FeedTab` in `FloatingNavigation.kt` and `FaimessScaffold` in `FaimessApp.kt` |
 | Change initial content | `DemoContent.kt` |
 | Introduce real API/storage | Add a repository/data source; replace ViewModel fixture reconstruction |
 | Add real video | Replace the preview in `PostCard.kt` / media sheet with lifecycle-aware Media3 playback |

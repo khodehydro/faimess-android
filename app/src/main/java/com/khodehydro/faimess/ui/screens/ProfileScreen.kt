@@ -33,8 +33,8 @@ import com.khodehydro.faimess.ui.components.Avatar
 import com.khodehydro.faimess.ui.components.EmptyState
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
-import com.khodehydro.faimess.ui.theme.Leaf
-import com.khodehydro.faimess.ui.theme.MutedInk
+import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.PrimaryDeep
 
 @Composable
 fun ProfileScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier: Modifier = Modifier) {
@@ -56,8 +56,8 @@ fun ProfileScreen(posts: List<FeedPost>, interactions: PostInteractions, modifie
                 ) {
                     Avatar(DemoContent.me, 76.dp)
                     Text(DemoContent.me.name, style = MaterialTheme.typography.headlineSmall)
-                    Text(stringResource(R.string.demo_profile), style = MaterialTheme.typography.labelMedium, color = Leaf)
-                    Text(stringResource(R.string.profile_bio), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MutedInk)
+                    Text(stringResource(R.string.demo_profile), style = MaterialTheme.typography.labelMedium, color = PrimaryDeep)
+                    Text(stringResource(R.string.profile_bio), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = InkMuted)
                     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                         Text(stringResource(R.string.profile_post_count, myPosts.size), style = MaterialTheme.typography.labelLarge)
                         Text(stringResource(R.string.profile_saved_count, saved.size), style = MaterialTheme.typography.labelLarge)

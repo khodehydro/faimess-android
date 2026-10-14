@@ -7,7 +7,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="false"
-        android:theme="@style/Theme.Frindle.Starting">
+        android:theme="@style/Theme.Faimess.Starting">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -44,9 +44,9 @@ import com.khodehydro.faimess.data.DemoContent
 import com.khodehydro.faimess.model.FeedActions
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Person
-import com.khodehydro.faimess.ui.theme.HeartRed
+import com.khodehydro.faimess.ui.theme.FlameDeep
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.MutedInk
+import com.khodehydro.faimess.ui.theme.InkMuted
 
 /** Secondary UI lives in dismissible native sheets; the launch surface remains the reference feed. */
 enum class FeedSheet { CreatePost, CreateStory, Comments, PostMenu, Notifications, Media }
@@ -120,7 +120,7 @@ private fun Composer(isStory: Boolean, onPublish: (String) -> Boolean) {
         modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.composer_note), style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+        Text(stringResource(R.string.composer_note), style = MaterialTheme.typography.bodyMedium, color = InkMuted)
         OutlinedTextField(
             value = draft,
             onValueChange = { if (it.length <= FeedActions.MAX_CAPTION_LENGTH) draft = it },
@@ -137,7 +137,7 @@ private fun Composer(isStory: Boolean, onPublish: (String) -> Boolean) {
             Modifier.fillMaxWidth().aspectRatio(2.4f).clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop,
         )
-        if (limitReached) Text(stringResource(R.string.demo_limit), color = HeartRed, style = MaterialTheme.typography.bodySmall)
+        if (limitReached) Text(stringResource(R.string.demo_limit), color = FlameDeep, style = MaterialTheme.typography.bodySmall)
         Button(
             onClick = { limitReached = !onPublish(draft) },
             enabled = draft.isNotBlank(),
@@ -154,7 +154,7 @@ private fun Comments(post: FeedPost, onComment: (String) -> Boolean) {
     var draft by rememberSaveable(post.id) { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().heightIn(max = 500.dp)) {
-        Text(stringResource(R.string.comments_note), style = MaterialTheme.typography.bodySmall, color = MutedInk)
+        Text(stringResource(R.string.comments_note), style = MaterialTheme.typography.bodySmall, color = InkMuted)
         LazyColumn(
             modifier = Modifier.weight(1f, fill = false),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -175,7 +175,7 @@ private fun Comments(post: FeedPost, onComment: (String) -> Boolean) {
             }
         }
         Spacer(Modifier.height(12.dp))
-        if (error) Text(stringResource(R.string.comment_error), color = HeartRed, style = MaterialTheme.typography.bodySmall)
+        if (error) Text(stringResource(R.string.comment_error), color = FlameDeep, style = MaterialTheme.typography.bodySmall)
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = draft,
@@ -203,7 +203,7 @@ private fun Comments(post: FeedPost, onComment: (String) -> Boolean) {
 @Composable
 private fun Notifications(onPerson: (Person) -> Unit) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
-        Text(stringResource(R.string.notifications_note), style = MaterialTheme.typography.bodySmall, color = MutedInk)
+        Text(stringResource(R.string.notifications_note), style = MaterialTheme.typography.bodySmall, color = InkMuted)
         listOf(
             DemoContent.sienna to R.string.notification_sienna,
             DemoContent.marcus to R.string.notification_marcus,
@@ -231,7 +231,7 @@ private fun MediaPreview(post: FeedPost) {
         Text(
             stringResource(if (post.isVideoPreview) R.string.video_demo_note else R.string.photo_demo_note),
             style = MaterialTheme.typography.bodyMedium,
-            color = MutedInk,
+            color = InkMuted,
         )
     }
 }

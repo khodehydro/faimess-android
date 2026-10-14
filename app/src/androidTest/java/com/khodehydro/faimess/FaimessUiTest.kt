@@ -31,11 +31,11 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
-class FrindleUiTest {
+class FaimessUiTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun referenceFeedAndFloatingNavigationAreVisible() {
-        compose.onNodeWithText("Frindle").assertIsDisplayed()
+        compose.onNodeWithText("FAIMESS").assertIsDisplayed()
         compose.onNodeWithTag("story_marcus").assertIsDisplayed()
         compose.onNodeWithTag("media_sienna-ridge").assertIsDisplayed()
         compose.onNodeWithTag("nav_home").assertIsSelected()
@@ -148,8 +148,8 @@ class FrindleUiTest {
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         // Test-only shell capture survives AGP uninstall/cleanup; the app itself needs no permission.
         val result = automation.executeShellCommand(
-            "mkdir -p /sdcard/Download/frindle-screenshots && " +
-                "screencap -p /sdcard/Download/frindle-screenshots/home.png && echo saved",
+            "mkdir -p /sdcard/Download/faimess-screenshots && " +
+                "screencap -p /sdcard/Download/faimess-screenshots/home.png && echo saved",
         )
         val output = ParcelFileDescriptor.AutoCloseInputStream(result).bufferedReader().use { it.readText() }
         assertEquals("saved", output.trim())

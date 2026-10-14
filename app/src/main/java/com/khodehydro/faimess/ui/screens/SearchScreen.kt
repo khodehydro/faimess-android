@@ -33,7 +33,7 @@ import com.khodehydro.faimess.ui.components.AppIcon
 import com.khodehydro.faimess.ui.components.EmptyState
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
-import com.khodehydro.faimess.ui.theme.MutedInk
+import com.khodehydro.faimess.ui.theme.InkMuted
 
 @Composable
 fun SearchScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier: Modifier = Modifier) {
@@ -60,7 +60,7 @@ fun SearchScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier
             Text(
                 if (query.isBlank()) stringResource(R.string.search_suggestions) else stringResource(R.string.search_results, results.size),
                 style = MaterialTheme.typography.bodySmall,
-                color = MutedInk,
+                color = InkMuted,
             )
         }
         LazyColumn(

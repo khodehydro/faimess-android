@@ -40,7 +40,7 @@ import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.ui.components.Avatar
 import com.khodehydro.faimess.ui.components.EmptyState
 import com.khodehydro.faimess.ui.components.OfflinePhoto
-import com.khodehydro.faimess.ui.theme.MutedInk
+import com.khodehydro.faimess.ui.theme.InkMuted
 
 @Composable
 fun DiscoverScreen(posts: List<FeedPost>, onMedia: (String) -> Unit, modifier: Modifier = Modifier) {
@@ -58,7 +58,7 @@ fun DiscoverScreen(posts: List<FeedPost>, onMedia: (String) -> Unit, modifier: M
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 Text(stringResource(R.string.discover_title), style = MaterialTheme.typography.headlineLarge)
-                Text(stringResource(R.string.discover_subtitle), style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+                Text(stringResource(R.string.discover_subtitle), style = MaterialTheme.typography.bodyMedium, color = InkMuted)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(selected = !savedOnly, onClick = { savedOnly = false }, label = { Text(stringResource(R.string.for_you)) })
                     FilterChip(selected = savedOnly, onClick = { savedOnly = true }, label = { Text(stringResource(R.string.saved)) })

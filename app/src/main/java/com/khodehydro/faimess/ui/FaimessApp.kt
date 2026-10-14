@@ -59,12 +59,12 @@ import com.khodehydro.faimess.ui.screens.DiscoverScreen
 import com.khodehydro.faimess.ui.screens.HomeScreen
 import com.khodehydro.faimess.ui.screens.ProfileScreen
 import com.khodehydro.faimess.ui.screens.SearchScreen
-import com.khodehydro.faimess.ui.theme.FeedBackground
-import com.khodehydro.faimess.ui.theme.FrindleTheme
+import com.khodehydro.faimess.ui.theme.CanvasBackground
+import com.khodehydro.faimess.ui.theme.FaimessTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
+fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
     PreloadFeedPhotos()
     val state by feedViewModel.uiState.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(FeedTab.Home) }
@@ -105,7 +105,7 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
 
     BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null) { tab = FeedTab.Home }
 
-    FrindleScaffold(
+    FaimessScaffold(
         state = state,
         tab = tab,
         onTab = { tab = it },
@@ -153,7 +153,7 @@ fun FrindleApp(feedViewModel: FeedViewModel = viewModel()) {
 }
 
 @Composable
-private fun FrindleScaffold(
+private fun FaimessScaffold(
     state: FeedUiState,
     tab: FeedTab,
     onTab: (FeedTab) -> Unit,
@@ -177,7 +177,7 @@ private fun FrindleScaffold(
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
             .imePadding(),
     ) {
-        Box(Modifier.align(Alignment.TopCenter).widthIn(max = 600.dp).fillMaxSize().background(FeedBackground)) {
+        Box(Modifier.align(Alignment.TopCenter).widthIn(max = 600.dp).fillMaxSize().background(CanvasBackground)) {
             Column(Modifier.fillMaxSize()) {
                 AppHeader(state.hasUnreadNotifications, onCreate, onNotifications)
                 screenState.SaveableStateProvider(tab.name) {
@@ -220,8 +220,8 @@ private fun sharePost(context: Context, post: FeedPost): Boolean = try {
 @Preview(name = "Large text", widthDp = 393, heightDp = 852, fontScale = 1.5f)
 @Composable
 private fun ReferenceFeedPreview() {
-    FrindleTheme {
-        FrindleScaffold(
+    FaimessTheme {
+        FaimessScaffold(
             state = FeedUiState(DemoContent.posts, DemoContent.stories),
             tab = FeedTab.Home,
             onTab = {},

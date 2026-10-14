@@ -25,7 +25,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Size
 import com.khodehydro.faimess.R
-import com.khodehydro.faimess.ui.theme.SoftSurface
+import com.khodehydro.faimess.ui.theme.Subtle
 import kotlinx.coroutines.awaitCancellation
 
 // Test-only metadata, not a spoken accessibility label. Screenshots wait for real decoded images.
@@ -61,7 +61,7 @@ fun OfflinePhoto(
     }
     val context = LocalContext.current.applicationContext
     val request = remember(context, resource) { offlinePhotoRequest(context, resource) }
-    val placeholder = remember { ColorPainter(SoftSurface) }
+    val placeholder = remember { ColorPainter(Subtle) }
     var ready by remember(request) { mutableStateOf(false) }
     AsyncImage(
         model = request,

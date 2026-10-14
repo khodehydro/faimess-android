@@ -33,10 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.Story
-import com.khodehydro.faimess.ui.theme.HeartRed
+import com.khodehydro.faimess.ui.theme.Flame
+import com.khodehydro.faimess.ui.theme.Heart
 import com.khodehydro.faimess.ui.theme.Ink
-import com.khodehydro.faimess.ui.theme.Leaf
-import com.khodehydro.faimess.ui.theme.Lime
+import com.khodehydro.faimess.ui.theme.Line
+import com.khodehydro.faimess.ui.theme.Primary
+import com.khodehydro.faimess.ui.theme.PrimaryDeep
+import com.khodehydro.faimess.ui.theme.Teal
 
 @Composable
 fun StoriesRow(stories: List<Story>, onStory: (Story) -> Unit, onAddStory: () -> Unit) {
@@ -55,8 +58,8 @@ fun StoriesRow(stories: List<Story>, onStory: (Story) -> Unit, onAddStory: () ->
 private fun StoryItem(story: Story, onClick: () -> Unit) {
     val description = if (story.isSelf) stringResource(R.string.add_story)
     else stringResource(R.string.story_description, story.person.name)
-    val ring = if (story.isLive) listOf(Color(0xFFFFCBAB), HeartRed, Color(0xFFDD595E))
-    else listOf(Color(0xFFDDF5C5), Lime, Color(0xFFCCF5C6), Color(0xFF9CD35D))
+    // The site's story rail: an unseen ring runs primary-deep → primary → teal; LIVE stays warm.
+    val ring = if (story.isLive) listOf(Flame, Heart, Flame) else listOf(PrimaryDeep, Primary, Teal)
 
     Column(
         modifier = Modifier.width(64.dp).clickable(role = Role.Button, onClick = onClick)
@@ -75,17 +78,17 @@ private fun StoryItem(story: Story, onClick: () -> Unit) {
                 Box(
                     Modifier.align(Alignment.BottomEnd).padding(end = 1.dp, bottom = 2.dp)
                         .size(19.dp).background(Color.White, CircleShape)
-                        .border(1.dp, Color(0xFFE2ECCC), CircleShape),
+                        .border(1.dp, Line, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AppIcon(R.drawable.ic_plus, modifier = Modifier.size(12.dp), tint = Leaf)
+                    AppIcon(R.drawable.ic_plus, modifier = Modifier.size(12.dp), tint = PrimaryDeep)
                 }
             }
             if (story.isLive) {
                 Text(
                     stringResource(R.string.live),
                     modifier = Modifier.align(Alignment.BottomCenter)
-                        .background(HeartRed, RoundedCornerShape(4.dp)).padding(horizontal = 7.dp, vertical = 1.dp),
+                        .background(Heart, RoundedCornerShape(4.dp)).padding(horizontal = 7.dp, vertical = 1.dp),
                     color = Color.White,
                     fontSize = 6.sp,
                     fontWeight = FontWeight.ExtraBold,

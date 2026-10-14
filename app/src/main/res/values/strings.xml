@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Frindle</string>
+    <string name="app_name">FAIMESS</string>
     <string name="create_post">Create a post</string>
     <string name="notifications">Notifications</string>
     <string name="unread_notifications">Notifications, unread activity</string>
@@ -53,7 +53,7 @@
     <string name="unsaved_post">Removed from saved posts.</string>
     <string name="share">Share post</string>
     <string name="share_chooser">Share a little inspiration</string>
-    <string name="share_text">%1$s on Frindle\n\n%2$s\n\nShared from the offline Frindle UI demo.</string>
+    <string name="share_text">%1$s on FAIMESS\n\n%2$s\n\nShared from the offline FAIMESS UI demo.</string>
     <string name="share_unavailable">No sharing app is available on this device.</string>
     <string name="video_preview">Video preview</string>
     <string name="photo_preview">A closer look</string>
@@ -80,7 +80,7 @@
     <string name="my_posts">My posts</string>
     <string name="profile_post_count">%1$d posts</string>
     <string name="profile_saved_count">%1$d saved</string>
-    <string name="search_title">Find your kind of green.</string>
+    <string name="search_title">Find what moves you.</string>
     <string name="search_hint">Search people or inspiration</string>
     <string name="clear_search">Clear search</string>
     <string name="search_suggestions">A little inspiration to get you started</string>

@@ -47,12 +47,12 @@ jobs:
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: frindle-debug-apk
+          name: faimess-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
       - name: Upload optimized on-device test APK
         uses: actions/upload-artifact@v4
         with:
-          name: frindle-performance-apk
+          name: faimess-performance-apk
           path: app/build/outputs/apk/performance/app-performance.apk
       - name: Upload verification reports
         if: always()

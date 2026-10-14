@@ -21,8 +21,8 @@
 در ترمینال پوشهٔ پروژه اجرا کنید:
 
 ```powershell
-git switch arena/ce2383fc-faimess-android
-git pull --ff-only origin arena/ce2383fc-faimess-android
+git switch arena/4ab96fac-faimess-android
+git pull --ff-only origin arena/4ab96fac-faimess-android
 .\gradlew.bat --stop
 .\gradlew.bat help --refresh-dependencies --info
 ```

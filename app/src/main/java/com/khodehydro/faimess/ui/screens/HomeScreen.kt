@@ -17,7 +17,7 @@ import com.khodehydro.faimess.model.Story
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.components.StoriesRow
-import com.khodehydro.faimess.ui.theme.FeedBackground
+import com.khodehydro.faimess.ui.theme.CanvasBackground
 
 @Composable
 fun HomeScreen(
@@ -29,7 +29,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.background(FeedBackground).testTag("home_feed"),
+        modifier = modifier.background(CanvasBackground).testTag("home_feed"),
         state = listState,
         contentPadding = PaddingValues(bottom = 124.dp),
     ) {
