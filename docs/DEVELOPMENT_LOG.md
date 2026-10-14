@@ -41,3 +41,7 @@ git show --stat HEAD
 - کامیت پیاده‌سازی: `25b3778`؛ پوش شاخه به GitHub موفق بود و تطبیق SHA شاخهٔ remote بررسی شد.
 - اجرای [38544095007](https://github.com/khodehydro/faimess-android/actions/runs/38544095007) پیش از build، در مرحلهٔ `android-actions/setup-android@v3` متوقف شد؛ هنوز نتیجهٔ کامپایل اپ نبود.
 - گردش‌کار به SDK از پیش نصب‌شدهٔ runner اوبونتو ۲۴٫۰۴ تغییر کرد، actionهای checkout و Java به نسخهٔ ۵ ارتقا یافتند و ثبت خروجی Gradle در گزارش خطای قابل مشاهده اضافه شد.
+
+### اصلاح سازگاری Android 8.0
+
+اجرای [38544413946](https://github.com/khodehydro/faimess-android/actions/runs/38544413946) تا Android Lint پیش رفت و یک خطای API برای `windowLightNavigationBar` در تم پایهٔ API 26 گزارش کرد. تنظیم XML که به API 27 نیاز داشت حذف شد؛ مدیریت آیکون‌های سیستم به `enableEdgeToEdge` سپرده شد و برای API 26 پس‌زمینهٔ تیرهٔ خوانا در نظر گرفته شد. خطا با تغییر واقعی کد رفع شد، نه با خاموش کردن lint یا افزایش حداقل نسخهٔ اندروید.

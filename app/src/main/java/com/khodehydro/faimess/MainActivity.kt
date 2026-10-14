@@ -17,7 +17,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            // API 26 cannot draw dark navigation icons; use a dark fallback scrim there.
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.rgb(32, 40, 25)),
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
