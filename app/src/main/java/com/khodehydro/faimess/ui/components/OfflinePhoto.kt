@@ -23,7 +23,8 @@ import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.size.Size
+import coil.size.Precision
+import coil.size.Scale
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.ui.theme.Subtle
 import kotlinx.coroutines.awaitCancellation
@@ -33,15 +34,29 @@ val PhotoReady = SemanticsPropertyKey<Boolean>("PhotoReady")
 var SemanticsPropertyReceiver.photoReady by PhotoReady
 
 /**
- * The bundled photos are bounded (192px portraits, <=1200px scenes). Requesting their original
- * size lets the same decoded bitmap serve the feed, grid, story and sheet, rather than decoding
- * a new size at each tap. Coil's shared, bounded memory cache owns the bitmaps; decoding is async.
- * Only local resource IDs are accepted: this component never needs a network connection.
+ * Longest edge, in pixels, of any bundled photo (192px portraits, 1200x800 scenes). The request
+ * below asks for an inexact box of this size so each asset is decoded once at its intrinsic size.
+ */
+const val MAX_PHOTO_EDGE_PX = 1200
+
+/**
+ * One decode of a bundled photo serves the feed, grid, story and sheet. Coil's shared, bounded
+ * memory cache owns the bitmaps; decoding is async. Only local resource IDs are accepted: this
+ * component never needs a network connection.
+ *
+ * Why a bounding box rather than `Size.ORIGINAL`: Coil 2.x decodes resource sources at ORIGINAL
+ * with `inScaled = true` and records the result as sampled, and a sampled cache entry is never
+ * reused for a later ORIGINAL request, so every screen would decode its own copy. The inexact
+ * box is at least as large as every asset: nothing is upscaled or downsampled, the entry is
+ * stored as unsampled and the same bitmap satisfies every later request. Scale and precision
+ * are pinned so `AsyncImage`, the preload and tests all build identical requests.
  */
 fun offlinePhotoRequest(context: Context, @DrawableRes resource: Int): ImageRequest =
     ImageRequest.Builder(context.applicationContext)
         .data(resource)
-        .size(Size.ORIGINAL)
+        .size(MAX_PHOTO_EDGE_PX)
+        .precision(Precision.INEXACT)
+        .scale(Scale.FIT)
         .memoryCachePolicy(CachePolicy.ENABLED)
         .diskCachePolicy(CachePolicy.DISABLED)
         .crossfade(false)

@@ -23,7 +23,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.khodehydro.faimess.ui.components.PhotoReady
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -144,13 +144,23 @@ class FaimessUiTest {
                 .fetchSemanticsNodes().isEmpty()
         }
         compose.waitForIdle()
-        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         // Test-only shell capture survives AGP uninstall/cleanup; the app itself needs no permission.
-        val result = automation.executeShellCommand(
-            "mkdir -p /sdcard/Download/faimess-screenshots && " +
-                "screencap -p /sdcard/Download/faimess-screenshots/home.png && echo saved",
-        )
-        val output = ParcelFileDescriptor.AutoCloseInputStream(result).bufferedReader().use { it.readText() }
-        assertEquals("saved", output.trim())
+        // UiAutomation starts each command directly, without a shell, so operators such as `&&`
+        // and `echo` are passed to the first program as plain arguments: run one command per step.
+        shell("mkdir -p $SCREENSHOT_DIR")
+        shell("screencap -p $SCREENSHOT_FILE")
+        val size = shell("stat -c %s $SCREENSHOT_FILE").trim()
+        assertTrue("screencap did not write $SCREENSHOT_FILE (stat: '$size')", (size.toLongOrNull() ?: 0L) > 0L)
+    }
+
+    /** Runs one plain command as the shell user and returns its standard output once it exits. */
+    private fun shell(command: String): String {
+        val output = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        return ParcelFileDescriptor.AutoCloseInputStream(output).bufferedReader().use { it.readText() }
+    }
+
+    private companion object {
+        const val SCREENSHOT_DIR = "/sdcard/Download/faimess-screenshots"
+        const val SCREENSHOT_FILE = "$SCREENSHOT_DIR/home.png"
     }
 }

@@ -87,6 +87,6 @@ The development sandbox does not include Java, an Android SDK or an emulator, an
 
 Version 0.1.1 adds rapid like/save state tests, latest-only Snackbar tests, batched touch input, navigation/state checks and an actual memory-cache reuse test for the bundled scenery. These are correctness tests, not a measured claim of touch latency or FPS.
 
-Screenshot capture now waits for the asynchronous photos and uses the test automation shell to save `/sdcard/Download/faimess-screenshots/home.png`, which survives APK cleanup. This is test-only; the normal app does not take screenshots or require storage permissions. `.github/scripts/run-device-tests.sh` preserves test failures and publishes their log tail as a check annotation.
+Screenshot capture now waits for the asynchronous photos and uses the test automation shell to save `/sdcard/Download/faimess-screenshots/home.png`, which survives APK cleanup. `UiAutomation.executeShellCommand` starts each program directly rather than through a shell, so the test issues `mkdir`, `screencap` and `stat` as three separate commands (the 0.1.1 version chained them with `&&`, which was never interpreted and produced an empty result). This is test-only; the normal app does not take screenshots or require storage permissions. `.github/scripts/run-device-tests.sh` preserves test failures and publishes their log tail as a check annotation.
 
 Use the [performance guide](PERFORMANCE.md) to compare on a real device without the debugger.
