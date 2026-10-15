@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -267,24 +268,24 @@ private fun FaimessScaffold(
                 )
             }
             if (!keyboardVisible) {
-                // Mini player: same Row skeleton as FloatingNavigation so they share
-                // the exact same width (menu capsule ≤236dp + 10dp gap + 62dp circle).
-                // Placed 8dp above the nav so they look like a two-row unit.
-                Box(
+                // Two-row unit: mini player (top) + nav (bottom), same width.
+                // Column wraps to FloatingNavigation's width; MiniPlayer fillMaxWidth
+                // matches it exactly — one purple capsule, same width as nav.
+                Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .wrapContentSize(Alignment.BottomCenter),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        MiniPlayer(
-                            state = playerState,
-                            onTogglePlayPause = onMiniPlayerToggle,
-                            onNext = onMiniPlayerNext,
-                            onOpen = onOpenPlayer,
-                        )
-                        FloatingNavigation(tab, onTab)
-                    }
+                    MiniPlayer(
+                        state = playerState,
+                        onTogglePlayPause = onMiniPlayerToggle,
+                        onNext = onMiniPlayerNext,
+                        onOpen = onOpenPlayer,
+                    )
+                    FloatingNavigation(tab, onTab)
                 }
             }
             SnackbarHost(

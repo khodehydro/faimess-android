@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
@@ -42,14 +41,11 @@ import com.khodehydro.faimess.ui.theme.Primary
 import com.khodehydro.faimess.ui.theme.PrimaryDeep
 
 /**
- * Compact player bar — one continuous purple capsule that spans the same
- * width as FloatingNavigation (menu capsule + gap + search button).
+ * A single purple capsule for the mini player.
  *
- * Layout inside:
- *   [cover · title/artist · play · next] [10dp gap] [62dp area]
- *
- * The outer Row has the same skeleton as FloatingNavigation so the two
- * always stay perfectly aligned and the purple never breaks.
+ * Lives inside the same Column as FloatingNavigation — the Column wraps to
+ * the nav's width, and this composable uses `fillMaxWidth()` so it stretches
+ * to exactly the same width.  One unbroken purple capsule, nothing else.
  */
 @Composable
 fun MiniPlayer(
@@ -67,157 +63,127 @@ fun MiniPlayer(
         exit = slideOutVertically(tween(280)) { it } + fadeOut(tween(280)),
         modifier = modifier,
     ) {
-        // Same Row skeleton as FloatingNavigation.
-        // The purple background lives on the outer Box that wraps the whole Row,
-        // so it is one unbroken capsule from Home to the end of Search.
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // One purple capsule — fillMaxWidth matches the Column (which wraps to nav width).
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    18.dp,
+                    RoundedCornerShape(50),
+                    ambientColor = PrimaryDeep.copy(alpha = 0.45f),
+                    spotColor = PrimaryDeep.copy(alpha = 0.68f),
+                )
+                .clip(RoundedCornerShape(50))
+                .background(Primary)
+                .testTag("mini_player"),
+        ) {
+            // Full-bar clickable → open the full player
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = false)
-                    .widthIn(max = 236.dp)
-                    .fillMaxWidth(),
-            ) {
-                // Purple capsule: shadow first, then clip, then background
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .shadow(
-                            18.dp,
-                            RoundedCornerShape(50),
-                            ambientColor = PrimaryDeep.copy(alpha = 0.45f),
-                            spotColor = PrimaryDeep.copy(alpha = 0.68f),
-                        )
-                        .clip(RoundedCornerShape(50))
-                        .background(Primary)
-                        .testTag("mini_player"),
-                )
+                    .matchParentSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onOpen,
+                    ),
+            )
 
-                // Full-bar clickable → open the full player
-                Box(
+            Column {
+                Row(
                     modifier = Modifier
-                        .matchParentSize()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = onOpen,
-                        ),
-                )
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, end = 10.dp, top = 6.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // Circular cover art
+                    OfflinePhoto(
+                        track.cover,
+                        null,
+                        Modifier
+                            .size(42.dp)
+                            .clip(CircleShape),
+                    )
 
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 6.dp, end = 10.dp, top = 6.dp, bottom = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Spacer(Modifier.width(10.dp))
+
+                    // Title + Artist
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                     ) {
-                        // Circular cover art
-                        OfflinePhoto(
-                            track.cover,
-                            null,
-                            Modifier
-                                .size(42.dp)
-                                .clip(CircleShape),
+                        Text(
+                            track.title,
+                            style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-
-                        Spacer(Modifier.width(10.dp))
-
-                        // Title + Artist
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(1.dp),
-                        ) {
-                            Text(
-                                track.title,
-                                style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                track.artist,
-                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White.copy(alpha = 0.75f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-
-                        // Play / Pause — white circle with purple icon
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(Color.White)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = onTogglePlayPause,
-                                )
-                                .testTag("mini_play_pause"),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            AppIcon(
-                                if (state.playing) R.drawable.ic_pause else R.drawable.ic_play,
-                                modifier = Modifier.size(17.dp),
-                                tint = PrimaryDeep,
-                            )
-                        }
-
-                        Spacer(Modifier.width(2.dp))
-
-                        // Next
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = onNext,
-                                )
-                                .testTag("mini_next"),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            AppIcon(
-                                R.drawable.ic_skip_next,
-                                modifier = Modifier.size(16.dp),
-                                tint = Color.White.copy(alpha = 0.8f),
-                            )
-                        }
+                        Text(
+                            track.artist,
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
 
-                    // Thin white progress bar
-                    LinearProgressIndicator(
-                        progress = { state.progress },
+                    // Play / Pause — white circle with purple icon
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = Color.White,
-                        trackColor = Color.White.copy(alpha = 0.25f),
-                        strokeCap = StrokeCap.Round,
-                    )
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = onTogglePlayPause,
+                            )
+                            .testTag("mini_play_pause"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AppIcon(
+                            if (state.playing) R.drawable.ic_pause else R.drawable.ic_play,
+                            modifier = Modifier.size(17.dp),
+                            tint = PrimaryDeep,
+                        )
+                    }
+
+                    Spacer(Modifier.width(2.dp))
+
+                    // Next
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = onNext,
+                            )
+                            .testTag("mini_next"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AppIcon(
+                            R.drawable.ic_skip_next,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White.copy(alpha = 0.8f),
+                        )
+                    }
                 }
+
+                // Thin white progress bar
+                LinearProgressIndicator(
+                    progress = { state.progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp),
+                    color = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.25f),
+                    strokeCap = StrokeCap.Round,
+                )
             }
-
-            // 10dp gap — same as between menu and search in the nav
-            Spacer(Modifier.width(10.dp))
-
-            // 62dp area — same size as the search circle.
-            // Wrapped in a purple Box so the capsule continues through it.
-            Box(
-                modifier = Modifier
-                    .size(62.dp)
-                    .shadow(
-                        18.dp,
-                        CircleShape,
-                        ambientColor = PrimaryDeep.copy(alpha = 0.45f),
-                        spotColor = PrimaryDeep.copy(alpha = 0.68f),
-                    )
-                    .clip(CircleShape)
-                    .background(Primary),
-            )
         }
     }
 }
