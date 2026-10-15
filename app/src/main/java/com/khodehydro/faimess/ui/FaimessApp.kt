@@ -267,26 +267,29 @@ private fun FaimessScaffold(
                 )
             }
             if (!keyboardVisible) {
-                // Mini player + floating nav in a Column so they share the same width
-                Column(
+                // Mini player: same Row skeleton as FloatingNavigation so they share
+                // the exact same width (menu capsule ≤236dp + 10dp gap + 62dp circle).
+                // Placed 8dp above the nav so they look like a two-row unit.
+                Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    MiniPlayer(
-                        state = playerState,
-                        onTogglePlayPause = onMiniPlayerToggle,
-                        onNext = onMiniPlayerNext,
-                        onOpen = onOpenPlayer,
-                    )
-                    FloatingNavigation(tab, onTab)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        MiniPlayer(
+                            state = playerState,
+                            onTogglePlayPause = onMiniPlayerToggle,
+                            onNext = onMiniPlayerNext,
+                            onOpen = onOpenPlayer,
+                        )
+                        FloatingNavigation(tab, onTab)
+                    }
                 }
             }
             SnackbarHost(
                 snackbar,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 100.dp),
+                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 86.dp),
             )
         }
     }
