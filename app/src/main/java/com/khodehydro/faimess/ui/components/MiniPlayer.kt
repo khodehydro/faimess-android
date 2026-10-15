@@ -42,13 +42,15 @@ import com.khodehydro.faimess.ui.theme.Primary
 import com.khodehydro.faimess.ui.theme.PrimaryDeep
 
 /**
- * Compact player bar in a fully-rounded purple capsule — matching the FAIMESS
- * web mini-player (src/sections/MiniPlayer.tsx).
+ * Compact player bar — one continuous purple capsule that stretches from the
+ * Home button to the end of the Search button, exactly matching the full width
+ * of FloatingNavigation (menu capsule + 10dp gap + search circle).
  *
- * The Row mirrors FloatingNavigation's own layout: a menu-sized capsule
- * (max 236dp, same as the nav menu) followed by a 10dp spacer and a
- * 62dp placeholder so the mini player is exactly the same width as
- * the nav.  Purple background, white text, circular cover.
+ * Layout inside the capsule:
+ *   [cover · title/artist · play/pause · next ‖ 10dp gap ‖ empty search-size area]
+ *
+ * The outer Row shares the same skeleton as FloatingNavigation so the two
+ * always stay perfectly aligned.  Purple background, white text, circular cover.
  */
 @Composable
 fun MiniPlayer(
@@ -66,36 +68,42 @@ fun MiniPlayer(
         exit = slideOutVertically(tween(280)) { it } + fadeOut(tween(280)),
         modifier = modifier,
     ) {
-        // Same Row skeleton as FloatingNavigation: menu-capsule (≤236dp) + 10dp gap + 62dp circle
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // The purple capsule — same max width as the nav menu
+        // One single purple capsule wrapping the entire nav-width Row.
+        Box(
+            modifier = Modifier
+                .shadow(
+                    18.dp,
+                    RoundedCornerShape(50),
+                    ambientColor = PrimaryDeep.copy(alpha = 0.45f),
+                    spotColor = PrimaryDeep.copy(alpha = 0.68f),
+                )
+                .clip(RoundedCornerShape(50))
+                .background(Primary)
+                .testTag("mini_player"),
+        ) {
+            // Full-bar clickable → open the full player
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = false)
-                    .widthIn(max = 236.dp)
-                    .fillMaxWidth()
-                    .shadow(
-                        18.dp,
-                        RoundedCornerShape(50),
-                        ambientColor = PrimaryDeep.copy(alpha = 0.45f),
-                        spotColor = PrimaryDeep.copy(alpha = 0.68f),
-                    )
-                    .clip(RoundedCornerShape(50))
-                    .background(Primary)
-                    .testTag("mini_player"),
-            ) {
-                // Full-bar clickable → open the full player
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = onOpen,
-                        ),
-                )
+                    .matchParentSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onOpen,
+                    ),
+            )
 
-                Column {
+            // Same Row skeleton as FloatingNavigation: left content + gap + right area
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Left area: same width as the nav menu capsule (weight 1f, max 236dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .widthIn(max = 236.dp)
+                        .fillMaxWidth(),
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -191,13 +199,14 @@ fun MiniPlayer(
                         strokeCap = StrokeCap.Round,
                     )
                 }
+
+                // 10dp gap — same as between menu and search in the nav
+                Spacer(Modifier.width(10.dp))
+
+                // 62dp area — same size as the search circle in the nav.
+                // Empty but the purple capsule continues through it.
+                Spacer(Modifier.size(62.dp))
             }
-
-            // 10dp gap — same as between menu and search in the nav
-            Spacer(Modifier.width(10.dp))
-
-            // 62dp placeholder — same size as the search circle in the nav
-            Spacer(Modifier.size(62.dp))
         }
     }
 }
