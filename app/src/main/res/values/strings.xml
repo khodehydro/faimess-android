@@ -124,4 +124,6 @@
     <string name="repeat_off">Repeat off</string>
     <string name="repeat_all">Repeat all</string>
     <string name="repeat_one">Repeat one</string>
+    <string name="lyrics_empty_title">No lyrics yet</string>
+    <string name="lyrics_empty_body">Be the first to send the lyrics for this song.</string>
 </resources>

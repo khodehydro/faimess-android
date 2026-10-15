@@ -197,10 +197,11 @@ fun FaimessApp(
             onNext = { playbackViewModel.next() },
             onPrevious = { playbackViewModel.previous() },
             onSeek = { playbackViewModel.seekTo(it) },
+            onSeekSeconds = { playbackViewModel.seekToSeconds(it) },
             onShuffle = { playbackViewModel.toggleShuffle() },
             onRepeat = { playbackViewModel.toggleRepeat() },
             onFavourite = { playbackViewModel.toggleFavourite() },
-            onPlayTrack = { track -> playTrack(track, playerState.playlist) },
+            onPlayTrack = { track -> playbackViewModel.playTrackInQueue(track) },
             modifier = Modifier.fillMaxSize(),
         )
     }
