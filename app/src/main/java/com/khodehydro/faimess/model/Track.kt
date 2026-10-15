@@ -20,17 +20,6 @@ data class AudioTrack(
 
 // Banner already in Social.kt
 
-/* ---- Lyric Line ---- */
-
-data class LyricLine(
-    val at: Double,             // timestamp in seconds
-    val ko: String,             // original
-    val fa: String,             // Persian translation
-    val romanization: String = "",
-)
-
-/* ---- Track with lyrics ---- */
-
 data class TrackLyrics(
     val trackId: String,
     val lines: List<LyricLine>,
