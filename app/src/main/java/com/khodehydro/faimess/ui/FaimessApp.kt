@@ -281,7 +281,7 @@ private fun FaimessScaffold(
                             .align(Alignment.BottomCenter)
                             .navigationBarsPadding()
                             .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .padding(bottom = 62.dp),
+                            .padding(bottom = 70.dp),
                     ) {
                         MiniPlayer(
                             state = playerState,
