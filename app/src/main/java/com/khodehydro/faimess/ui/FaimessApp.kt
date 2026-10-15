@@ -312,9 +312,9 @@ private fun FaimessScaffold(
                 screenState.SaveableStateProvider(tab.name) {
                     when (tab) {
                         FeedTab.Home -> HomeScreen(state, homeListState, interactions, onStory, onAddStory, Modifier.fillMaxSize())
-                        FeedTab.Discover -> DiscoverScreen(state.posts, interactions.onOpen, Modifier.fillMaxSize())
+                        FeedTab.Discover -> DiscoverScreen(state.posts, interactions.onOpen, Modifier.fillMaxSize(), onArtists = onOpenArtists, onAlbums = onOpenAlbums, onNews = onOpenNews, onShop = onOpenShop)
                         FeedTab.Calendar -> CalendarScreen({ onTab(FeedTab.Discover) }, Modifier.fillMaxSize())
-                        FeedTab.Profile -> ProfileScreen(state.posts, interactions, Modifier.fillMaxSize())
+                        FeedTab.Profile -> ProfileScreen(state.posts, interactions, Modifier.fillMaxSize(), onBadges = onOpenBadges, onLeaderboard = onOpenLeaderboard, onMyProfile = { onOpenUserProfile("sori") })
                         FeedTab.Search -> SearchScreen(state.posts, interactions, Modifier.fillMaxSize())
                     }
                 }
