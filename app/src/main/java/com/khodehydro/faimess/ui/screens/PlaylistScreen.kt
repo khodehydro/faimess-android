@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,8 +24,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
@@ -46,8 +45,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -154,19 +156,7 @@ private fun PlaylistHeader(playlist: Playlist, onBack: () -> Unit, onShare: () -
         }
         PlaylistCover(playlist, 34.dp, shape = CircleShape)
         Spacer(Modifier.width(9.dp))
-        // Same weight and tracking as the FAIMESS wordmark; long names shrink before they ellipsize.
-        BasicText(
-            text = playlist.name,
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.02).em,
-                color = Ink,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            autoSize = TextAutoSize.StepBased(minFontSize = 15.sp, maxFontSize = 22.sp, stepSize = 0.5.sp),
-            modifier = Modifier.weight(1f).semantics { heading() },
-        )
+        FittedTitle(playlist.name, Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             IconButton(onClick = onShare, modifier = Modifier.size(48.dp).testTag("playlist_share")) {
                 Box(Modifier.size(40.dp).background(Subtle, CircleShape), contentAlignment = Alignment.Center) {
@@ -181,6 +171,48 @@ private fun PlaylistHeader(playlist: Playlist, onBack: () -> Unit, onShare: () -
         }
     }
 }
+
+/**
+ * The playlist's name in the wordmark's clothes (extra-bold, -0.02 em). Long names are measured
+ * and shrunk from 22 sp down to 15 sp before they ellipsize, so one line still reads as a title.
+ */
+@Composable
+private fun FittedTitle(text: String, modifier: Modifier = Modifier) {
+    val base = MaterialTheme.typography.headlineSmall.copy(
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = (-0.02).em,
+        color = Ink,
+    )
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints(modifier) {
+        val width = constraints.maxWidth
+        val fontSize = remember(text, width, base, measurer) {
+            var size = MAX_TITLE_SP
+            while (size > MIN_TITLE_SP) {
+                val layout = measurer.measure(
+                    text = AnnotatedString(text),
+                    style = base.copy(fontSize = size.sp),
+                    constraints = Constraints(maxWidth = width),
+                    maxLines = 1,
+                )
+                if (!layout.hasVisualOverflow) break
+                size -= TITLE_STEP_SP
+            }
+            size.sp
+        }
+        Text(
+            text,
+            style = base.copy(fontSize = fontSize),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics { heading() },
+        )
+    }
+}
+
+private const val MAX_TITLE_SP = 22f
+private const val MIN_TITLE_SP = 15f
+private const val TITLE_STEP_SP = 0.5f
 
 /** Owner, caption, facts and controls in the feed card's own clothes, so the page continues the feed. */
 @Composable
