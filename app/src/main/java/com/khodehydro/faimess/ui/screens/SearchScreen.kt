@@ -31,6 +31,7 @@ import com.khodehydro.faimess.model.FeedActions
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.ui.components.AppIcon
 import com.khodehydro.faimess.ui.components.EmptyState
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.theme.InkMuted
@@ -64,7 +65,7 @@ fun SearchScreen(posts: List<FeedPost>, interactions: PostInteractions, modifier
             )
         }
         LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 124.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = LocalBottomChromeHeight.current),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (results.isEmpty()) {

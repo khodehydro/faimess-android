@@ -43,6 +43,7 @@ import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.ui.components.Avatar
 import com.khodehydro.faimess.ui.components.EmptyState
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.components.OfflinePhoto
 import com.khodehydro.faimess.ui.theme.InkMuted
 
@@ -55,7 +56,7 @@ fun DiscoverScreen(posts: List<FeedPost>, onOpen: (String) -> Unit, modifier: Mo
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.testTag("discover_screen"),
-        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 124.dp),
+        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 18.dp, bottom = LocalBottomChromeHeight.current),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

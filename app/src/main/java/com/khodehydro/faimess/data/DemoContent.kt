@@ -32,16 +32,16 @@ object DemoContent {
     )
 
     // The site's demo catalogue: ids are the shelf ids the web player resolves (nt* newest, tr* trending).
-    val afterimage = Track("nt7", "Afterimage", "NOVAE", "Afterimage · single", 204, R.drawable.album_afterimage)
-    val afterglow = Track("nt1", "Afterglow", "NOVAE", "Afterglow", 192, R.drawable.album_afterglow)
-    val midnightSeoul = Track("nt2", "Midnight Seoul", "AXION", "Midnight Seoul · single", 208, R.drawable.album_midnight_seoul)
-    val paperHeart = Track("nt3", "Paper Heart", "SEORA", "Paper Heart · single", 178, R.drawable.album_paper_heart)
-    val neonBloom = Track("nt4", "Neon Bloom", "LUNEX", "Neon Bloom · single", 185, R.drawable.album_neon_bloom)
-    val haloDrive = Track("nt5", "Halo Drive", "PRISM9", "Velvet Static", 221, R.drawable.album_velvet_static)
-    val silverHour = Track("nt6", "Silver Hour", "HANEUL", "Tokyo Window", 242, R.drawable.album_tokyo_window)
-    val cherryStatic = Track("tr3", "Cherry Static", "PRISM9", "Cherry Static · single", 199, R.drawable.album_cherry_static)
-    val gravity = Track("tr5", "Gravity", "VELVET MOON", "Nightbloom", 216, R.drawable.album_nightbloom)
-    val blueSignal = Track("tr6", "Blue Signal", "KAIROS", "Blue Hour", 182, R.drawable.album_blue_hour)
+    val afterimage = Track("nt7", "Afterimage", "NOVAE", "Afterimage · single", 204, R.drawable.album_afterimage, plays = 18_940)
+    val afterglow = Track("nt1", "Afterglow", "NOVAE", "Afterglow", 192, R.drawable.album_afterglow, plays = 2_431_902)
+    val midnightSeoul = Track("nt2", "Midnight Seoul", "AXION", "Midnight Seoul · single", 208, R.drawable.album_midnight_seoul, plays = 1_876_540)
+    val paperHeart = Track("nt3", "Paper Heart", "SEORA", "Paper Heart · single", 178, R.drawable.album_paper_heart, plays = 1_204_318)
+    val neonBloom = Track("nt4", "Neon Bloom", "LUNEX", "Neon Bloom · single", 185, R.drawable.album_neon_bloom, plays = 942_770)
+    val haloDrive = Track("nt5", "Halo Drive", "PRISM9", "Velvet Static", 221, R.drawable.album_velvet_static, plays = 688_215)
+    val silverHour = Track("nt6", "Silver Hour", "HANEUL", "Tokyo Window", 242, R.drawable.album_tokyo_window, plays = 512_406)
+    val cherryStatic = Track("tr3", "Cherry Static", "PRISM9", "Cherry Static · single", 199, R.drawable.album_cherry_static, plays = 734_920)
+    val gravity = Track("tr5", "Gravity", "VELVET MOON", "Nightbloom", 216, R.drawable.album_nightbloom, plays = 421_388)
+    val blueSignal = Track("tr6", "Blue Signal", "KAIROS", "Blue Hour", 182, R.drawable.album_blue_hour, plays = 265_140)
 
     val tracks = listOf(
         afterimage, afterglow, midnightSeoul, paperHeart, neonBloom, haloDrive, silverHour, cherryStatic, gravity, blueSignal,

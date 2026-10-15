@@ -27,6 +27,8 @@ data class Track(
     val album: String,
     val seconds: Int,
     @DrawableRes val cover: Int,
+    /** lifetime play count from the catalogue (`/api/tracks` → `plays`); shown in the player header. */
+    val plays: Int = 0,
 )
 
 /**

@@ -14,6 +14,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,13 @@ import com.khodehydro.faimess.model.Person
 import com.khodehydro.faimess.ui.theme.Ink
 import com.khodehydro.faimess.ui.theme.InkMuted
 import com.khodehydro.faimess.ui.theme.Subtle
+
+/**
+ * How much of the screen's bottom the floating chrome covers: the menu, plus the mini player once
+ * a song is loaded. Scrolling screens read it as their bottom content padding so the last row can
+ * always scroll clear of the capsules.
+ */
+val LocalBottomChromeHeight = compositionLocalOf { 124.dp }
 
 @Composable
 fun AppIcon(

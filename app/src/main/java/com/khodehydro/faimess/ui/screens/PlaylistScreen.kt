@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,10 +57,12 @@ import androidx.compose.ui.unit.sp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Playlist
+import com.khodehydro.faimess.model.Track
 import com.khodehydro.faimess.model.compactCount
 import com.khodehydro.faimess.model.formatLength
 import com.khodehydro.faimess.ui.components.AppIcon
 import com.khodehydro.faimess.ui.components.Avatar
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.components.PlaylistCover
 import com.khodehydro.faimess.ui.components.PostAuthorHeader
 import com.khodehydro.faimess.ui.components.PostEngagementRow
@@ -81,6 +84,14 @@ import com.khodehydro.faimess.ui.theme.Subtle
 import com.khodehydro.faimess.ui.theme.TealDeep
 import com.khodehydro.faimess.ui.theme.TealSoft
 
+/** What the playlist page can start: the whole list, a shuffled list, or one song inside it. */
+@Immutable
+data class PlaylistPlayback(
+    val onPlayAll: (Playlist) -> Unit,
+    val onShuffle: (Playlist) -> Unit,
+    val onTrack: (Playlist, Track) -> Unit,
+)
+
 /**
  * The page a playlist post opens. It is built like the home screen: the same 70 dp white header,
  * with the playlist's circular cover where the logo is, its name where the wordmark is, and share
@@ -93,26 +104,29 @@ fun PlaylistScreen(
     post: FeedPost,
     suggestions: List<FeedPost>,
     interactions: PostInteractions,
+    playback: PlaylistPlayback,
     onBack: () -> Unit,
-    onPlay: () -> Unit,
     modifier: Modifier = Modifier,
+    nowPlayingId: String? = null,
 ) {
     BackHandler(onBack = onBack)
     val playlist = post.playlist
+    val onPlayAll = remember(playback, playlist) { { playback.onPlayAll(playlist) } }
+    val onShuffle = remember(playback, playlist) { { playback.onShuffle(playlist) } }
     Column(
         // Consume stray taps so nothing reaches the feed underneath this page.
         modifier = modifier.fillMaxSize().background(CanvasBackground)
             .pointerInput(Unit) { detectTapGestures { } }
             .testTag("playlist_screen"),
     ) {
-        PlaylistHeader(playlist, onBack, onShare = { interactions.onShare(post.id) }, onPlay = onPlay)
+        PlaylistHeader(playlist, onBack, onShare = { interactions.onShare(post.id) }, onPlay = onPlayAll)
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag("playlist_list"),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 124.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = LocalBottomChromeHeight.current),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "about", contentType = "about") {
-                AboutCard(post, interactions, onPlay)
+                AboutCard(post, interactions, onPlayAll, onShuffle)
                 Spacer(Modifier.height(6.dp))
             }
             item(key = "tracks_title", contentType = "title") {
@@ -123,7 +137,13 @@ fun PlaylistScreen(
                 )
             }
             itemsIndexed(playlist.tracks, key = { index, track -> "${track.id}-$index" }, contentType = { _, _ -> "track" }) { index, track ->
-                TrackRow(index + 1, track, Modifier.testTag("track_${track.id}"), onClick = onPlay)
+                TrackRow(
+                    index + 1,
+                    track,
+                    Modifier.testTag("track_${track.id}"),
+                    nowPlaying = track.id == nowPlayingId,
+                    onClick = { playback.onTrack(playlist, track) },
+                )
             }
             item(key = "artists", contentType = "artists") {
                 Spacer(Modifier.height(6.dp))
@@ -216,7 +236,7 @@ private const val TITLE_STEP_SP = 0.5f
 
 /** Owner, caption, facts and controls in the feed card's own clothes, so the page continues the feed. */
 @Composable
-private fun AboutCard(post: FeedPost, interactions: PostInteractions, onPlay: () -> Unit) {
+private fun AboutCard(post: FeedPost, interactions: PostInteractions, onPlay: () -> Unit, onShuffle: () -> Unit) {
     val playlist = post.playlist
     Surface(shape = RoundedCornerShape(27.dp), color = Color.White, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 3.dp)) {
@@ -245,7 +265,7 @@ private fun AboutCard(post: FeedPost, interactions: PostInteractions, onPlay: ()
                     Text(stringResource(R.string.play_playlist), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 OutlinedButton(
-                    onClick = onPlay,
+                    onClick = onShuffle,
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Ink),
                     contentPadding = PaddingValues(horizontal = 14.dp),

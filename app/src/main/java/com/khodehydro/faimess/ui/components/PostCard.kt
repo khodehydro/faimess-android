@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +72,8 @@ data class PostInteractions(
     val onOptions: (String) -> Unit,
     val onOpen: (String) -> Unit,
     val onAuthor: (Person) -> Unit,
+    /** the card's play glyph: start the shared playlist from the top. */
+    val onPlay: (String) -> Unit = {},
 )
 
 @Immutable
@@ -81,6 +84,7 @@ private data class PostClickActions(
     val options: () -> Unit,
     val open: () -> Unit,
     val author: () -> Unit,
+    val play: () -> Unit,
 )
 
 @Composable
@@ -95,6 +99,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             options = { interactions.onOptions(postId) },
             open = { interactions.onOpen(postId) },
             author = { interactions.onAuthor(author) },
+            play = { interactions.onPlay(postId) },
         )
     }
     Surface(
@@ -109,7 +114,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             Spacer(Modifier.height(9.dp))
             ExpandableCaption(post.caption, postId)
             Spacer(Modifier.height(13.dp))
-            PlaylistPanel(postId, post.playlist, clicks.open)
+            PlaylistPanel(postId, post.playlist, clicks.open, clicks.play)
             PostEngagementRow(post, clicks.like, clicks.comments, clicks.share, "like_$postId")
         }
     }
@@ -187,10 +192,14 @@ fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit, onOptio
     }
 }
 
-/** The post's body: the shared playlist's name, facts and first songs. Tapping it opens the playlist. */
+/**
+ * The post's body: the shared playlist's name, facts and first songs. Tapping it opens the
+ * playlist; the purple play glyph starts it right away.
+ */
 @Composable
-private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Unit) {
+private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Unit, onPlay: () -> Unit) {
     val description = stringResource(R.string.open_playlist, playlist.name)
+    val playDescription = stringResource(R.string.play_playlist_named, playlist.name)
     val facts = playlistFacts(playlist)
     Column(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp)).background(Subtle)
@@ -208,7 +217,15 @@ private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Uni
                 Text(playlist.name, style = MaterialTheme.typography.titleMedium, color = Ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(facts, style = MaterialTheme.typography.bodySmall, color = InkMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            AppIcon(R.drawable.ic_play_circle, modifier = Modifier.size(36.dp), tint = Primary)
+            Box(
+                modifier = Modifier.size(44.dp).clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onPlay)
+                    .semantics { contentDescription = playDescription }
+                    .testTag("play_$postId"),
+                contentAlignment = Alignment.Center,
+            ) {
+                AppIcon(R.drawable.ic_play_circle, modifier = Modifier.size(36.dp), tint = Primary)
+            }
         }
         playlist.tracks.take(PREVIEW_TRACKS).forEachIndexed { index, track ->
             TrackRow(index + 1, track, compact = true)

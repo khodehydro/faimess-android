@@ -12,6 +12,10 @@
 
 **Licence warning, inherited from the site's `docs/photos.md`:** the web project documents these covers as *temporary mock-up placeholders* cropped from web image-search results (Pinterest, wallpaper sites, Dreamstime previews, …), not licensed stock. They are fine for this offline demo, but — exactly like the website — they must be replaced with licensed or commissioned artwork before any public or commercial release. Replace the files under the same names; no code changes are needed. The artist and album names are fictional.
 
+## Demo audio (milestone 04)
+
+`app/src/main/res/raw/faimess_demo.mp3` (1,600,261 bytes) is a byte-identical copy of `src/assets/audio/faimess-demo.mp3` from the FAIMESS web repository (commit `c575e7c`). Per the site's `docs/audio.md` it is a 2:40 instrumental **synthesized by the project itself** (mono, 44.1 kHz, 80 kbps), so it carries no third-party rights; the website plays this one master for every song in its catalogue and the app does the same. Replace the file under the same name to change the demo audio; real per-track streams (`streamUrl` from `/api/tracks`) are a later milestone.
+
 ## Photography
 
 `app/src/main/res/drawable-nodpi/` contains two original AI-generated scenic photographs and six original AI-generated fictional profile portraits created for this UI milestone on 2026-10-14:
@@ -36,7 +40,7 @@ Manrope, Copyright 2020 The Manrope Project Authors, distributed under the SIL O
 
 Two sources, both plain `VectorDrawable` XML with no icon library dependency:
 
-- **Material Icons (Google), Apache License 2.0** — the navigation pairs `ic_home_outline/filled`, `ic_explore_outline/filled`, `ic_calendar_outline/filled`, `ic_person_outline/filled`, plus `ic_search`, `ic_play_circle`, `ic_queue_music` and `ic_shuffle`. Each file is the 24 px path from `google/material-design-icons` (`src/<category>/<name>/materialicons[outlined]/24px.svg`) converted to Android path data, with the licence noted in a comment at the top of the file. The site itself draws stroke-only "Lets Icons" glyphs; Android uses Material's filled/outlined pairs because the request was a filled icon for the selected tab and an outlined one otherwise.
+- **Material Icons (Google), Apache License 2.0** — the navigation pairs `ic_home_outline/filled`, `ic_explore_outline/filled`, `ic_calendar_outline/filled`, `ic_person_outline/filled`, plus `ic_search`, `ic_play_circle`, `ic_queue_music`, `ic_shuffle` and the player glyphs `ic_pause`, `ic_skip_next`, `ic_skip_previous`, `ic_repeat`, `ic_repeat_one`, `ic_expand_more`, `ic_lyrics`. Each file is the 24 px path from `google/material-design-icons` (`src/<category>/<name>/materialicons[outlined]/24px.svg`) converted to Android path data, with the licence noted in a comment at the top of the file. The site itself draws stroke-only "Lets Icons" glyphs; Android uses Material's filled/outlined pairs because the request was a filled icon for the selected tab and an outlined one otherwise.
 - **Project-authored** — the remaining small monochrome icons (heart, comment, send, bookmark, bell, globe, more, close, check, plus, arrows, play) are drawn in project XML using basic geometry. The first milestone's four-lobed placeholder logo and its hand-drawn navigation icons were removed.
 
 ## Gradle Wrapper

@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.model.FeedUiState
 import com.khodehydro.faimess.model.Story
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.components.StoriesRow
@@ -31,7 +32,7 @@ fun HomeScreen(
     LazyColumn(
         modifier = modifier.background(CanvasBackground).testTag("home_feed"),
         state = listState,
-        contentPadding = PaddingValues(bottom = 124.dp),
+        contentPadding = PaddingValues(bottom = LocalBottomChromeHeight.current),
     ) {
         item(key = "stories", contentType = "stories") {
             StoriesRow(state.stories, onStory, onAddStory)

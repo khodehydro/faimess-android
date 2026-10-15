@@ -19,12 +19,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.ui.components.EmptyState
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.theme.InkMuted
 
 @Composable
 fun CalendarScreen(onDiscover: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(18.dp).padding(bottom = 124.dp)
+        modifier = modifier.verticalScroll(rememberScrollState()).padding(18.dp).padding(bottom = LocalBottomChromeHeight.current)
             .testTag("calendar_screen"),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {

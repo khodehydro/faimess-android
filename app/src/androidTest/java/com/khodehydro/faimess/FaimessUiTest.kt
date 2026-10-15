@@ -5,10 +5,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.hasAnyAncestor
@@ -140,11 +142,54 @@ class FaimessUiTest {
         // Neon Bloom is the fifth song: hidden behind "+2 more tracks" in the card, listed on the page.
         compose.onNodeWithTag("playlist_list").performScrollToNode(hasTestTag("track_nt4"))
         compose.onNodeWithTag("track_nt4").assertIsDisplayed()
+        // Play starts the playlist from its first song and the mini player rises above the menu.
         compose.onNodeWithTag("playlist_play").performClick()
-        compose.onNodeWithText(compose.activity.getString(R.string.playback_not_connected)).assertIsDisplayed()
+        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Midnight Seoul"))
         compose.onNodeWithTag("playlist_back").performClick()
         compose.onNodeWithTag("playlist_screen").assertDoesNotExist()
         compose.onNodeWithTag("home_feed").assertIsDisplayed()
+        compose.onNodeWithTag("mini_player").assertIsDisplayed()
+    }
+
+    @Test fun tappingASongPlaysItInTheMiniPlayerAndTheFullPlayerFollowsTheQueue() {
+        compose.onNodeWithTag("playlist_sienna-drive").performClick()
+        compose.onNodeWithTag("playlist_list").performScrollToNode(hasTestTag("track_nt1"))
+        compose.onNodeWithTag("track_nt1").performClick()
+        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Afterglow"))
+        compose.onNodeWithTag("mini_toggle").assertContentDescriptionEquals("Pause").performClick()
+        compose.onNodeWithTag("mini_toggle").assertContentDescriptionEquals("Play").performClick()
+        compose.onNodeWithTag("mini_toggle").assertContentDescriptionEquals("Pause")
+
+        compose.onNodeWithTag("mini_player").performClick()
+        compose.onNodeWithTag("player_screen").assertIsDisplayed()
+        compose.onNodeWithTag("player_title").assertTextEquals("Afterglow")
+        // Afterglow is the second of the six songs in Sienna's playlist, and the lyric sheet is bilingual.
+        compose.onNodeWithTag("player_queue_pill").assertContentDescriptionEquals("Song 2 of 6")
+        compose.onNodeWithTag("lyrics_panel").performScrollToNode(hasText("해가 진 뒤에도 남아 있는 빛"))
+        compose.onNode(hasText("نوری که بعد از غروب هم می‌مونه")).assertExists()
+
+        compose.onNodeWithTag("player_next").performClick()
+        compose.onNodeWithTag("player_title").assertTextEquals("Silver Hour")
+        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Save to Liked songs").performClick()
+        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Remove from Liked songs")
+        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat off").performClick()
+        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat all")
+
+        compose.onNodeWithTag("tab_queue").performClick()
+        compose.onNodeWithTag("queue_nt2").performScrollTo().performClick()
+        compose.onNodeWithTag("player_title").assertTextEquals("Midnight Seoul")
+        Espresso.pressBack()
+        compose.onNodeWithTag("player_screen").assertDoesNotExist()
+        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Midnight Seoul"))
+    }
+
+    @Test fun theFeedCardsPlayGlyphStartsThePlaylistWithoutLeavingTheFeed() {
+        compose.onNodeWithTag("play_sienna-drive").performClick()
+        compose.onNodeWithTag("playlist_screen").assertDoesNotExist()
+        compose.onNodeWithTag("home_feed").assertIsDisplayed()
+        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Midnight Seoul"))
+        compose.onNodeWithTag("mini_next").performClick()
+        compose.onNodeWithTag("mini_player").assert(hasText("Afterglow"))
     }
 
     @Test fun likingOnThePlaylistPageIsTheSameLikeAsInTheFeed() {

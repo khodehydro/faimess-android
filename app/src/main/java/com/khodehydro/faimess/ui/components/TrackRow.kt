@@ -39,6 +39,9 @@ import com.khodehydro.faimess.ui.theme.Ink
 import com.khodehydro.faimess.ui.theme.InkFaint
 import com.khodehydro.faimess.ui.theme.InkMuted
 import com.khodehydro.faimess.ui.theme.Line
+import com.khodehydro.faimess.ui.theme.Primary
+import com.khodehydro.faimess.ui.theme.PrimaryDeep
+import com.khodehydro.faimess.ui.theme.PrimaryFaint
 
 /** "6 tracks · 21 min · Mellow" — the facts line the site prints under a playlist's name. */
 @Composable
@@ -51,7 +54,9 @@ fun playlistFacts(playlist: Playlist): String = stringResource(
 
 /**
  * One song, drawn like the site's detail rows: index, square artwork, title over artist · album,
- * and the clock at the end. White on a soft panel; [compact] is the feed-card size.
+ * and the clock at the end. White on a soft panel; [compact] is the feed-card size. The song that
+ * is playing gets the site's tinted row: primary border, faint purple fill and a play glyph in
+ * place of its number.
  */
 @Composable
 fun TrackRow(
@@ -59,13 +64,16 @@ fun TrackRow(
     track: Track,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    nowPlaying: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(14.dp)
     val artSize = if (compact) 36.dp else 44.dp
     val description = stringResource(R.string.play_track, track.title, track.artist)
     Row(
-        modifier = modifier.fillMaxWidth().clip(shape).background(Color.White).border(1.dp, Line, shape)
+        modifier = modifier.fillMaxWidth().clip(shape)
+            .background(if (nowPlaying) PrimaryFaint else Color.White)
+            .border(1.dp, if (nowPlaying) Primary.copy(alpha = 0.35f) else Line, shape)
             .then(
                 if (onClick != null) {
                     Modifier.clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = description }
@@ -77,19 +85,25 @@ fun TrackRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            index.toString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = InkFaint,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(16.dp),
-        )
+        if (nowPlaying) {
+            Box(Modifier.width(16.dp), contentAlignment = Alignment.Center) {
+                AppIcon(R.drawable.ic_play, stringResource(R.string.now_playing), Modifier.size(14.dp), tint = PrimaryDeep)
+            }
+        } else {
+            Text(
+                index.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = InkFaint,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(16.dp),
+            )
+        }
         OfflinePhoto(track.cover, null, Modifier.size(artSize).clip(RoundedCornerShape(if (compact) 10.dp else 12.dp)))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Text(
                 track.title,
                 style = MaterialTheme.typography.titleSmall,
-                color = Ink,
+                color = if (nowPlaying) PrimaryDeep else Ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

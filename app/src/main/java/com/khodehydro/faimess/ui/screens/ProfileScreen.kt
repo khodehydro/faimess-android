@@ -31,6 +31,7 @@ import com.khodehydro.faimess.data.DemoContent
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.ui.components.Avatar
 import com.khodehydro.faimess.ui.components.EmptyState
+import com.khodehydro.faimess.ui.components.LocalBottomChromeHeight
 import com.khodehydro.faimess.ui.components.PostCard
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.theme.InkMuted
@@ -44,7 +45,7 @@ fun ProfileScreen(posts: List<FeedPost>, interactions: PostInteractions, modifie
     val visible = if (savedOnly) saved else myPosts
     LazyColumn(
         modifier = modifier.testTag("profile_screen"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 124.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = LocalBottomChromeHeight.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

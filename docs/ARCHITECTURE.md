@@ -12,9 +12,12 @@ app/src/main/
 ├── java/com/khodehydro/faimess/
 │   ├── MainActivity.kt                 # Splash, edge-to-edge, app entry
 │   ├── data/DemoContent.kt             # People, stories, the site's demo tracks/playlists, sample posts
+│   ├── data/DemoLyrics.kt              # The site's bilingual lyric sheets per track id
 │   ├── model/FeedModels.kt             # Immutable models (Track, Playlist, FeedPost…), pure transformations, formatters
+│   ├── model/PlayerModels.kt           # PlayerState, RepeatMode, LyricLine, PlayerLogic (queue rules)
 │   └── ui/
 │       ├── FeedViewModel.kt            # Local mutations and small saved-state snapshots
+│       ├── PlayerViewModel.kt          # MediaPlayer session: queue, clock, repeat/shuffle, likes, audio focus
 │       ├── LatestSnackbar.kt           # Latest feedback wins; no stale message queue
 │       ├── FaimessApp.kt               # App shell, navigation, overlays, Android sharing
 │       ├── components/
@@ -23,16 +26,18 @@ app/src/main/
 │       │   ├── PostCard.kt             # Card = header + caption + PlaylistPanel + engagement row
 │       │   ├── TrackRow.kt             # Track row, playlist cover, facts line (shared by card and page)
 │       │   ├── FloatingNavigation.kt   # FeedTab (outlined/filled icon pair), capsule + search circle
+│       │   ├── MiniPlayer.kt           # Purple capsule above the menu: cover, title, play/pause, next
 │       │   ├── FeedSheets.kt
 │       │   ├── StoryViewer.kt
 │       │   └── Common.kt
-│       ├── screens/                    # Home, Discover, Calendar, Profile, Search, PlaylistScreen (overlay page)
+│       ├── screens/                    # Home, Discover, Calendar, Profile, Search, PlaylistScreen, PlayerScreen
 │       └── theme/                      # FAIMESS palette (Color.kt), typography, light theme
 └── res/
     ├── drawable/                       # Vector icons (project-authored + Material Icons pairs)
     ├── drawable-nodpi/                 # Avatars, story scenes, album_*/playlist_* covers, brand_logo.png
     ├── mipmap-*/                       # Adaptive launcher foreground cut from the logo (see tools/)
     ├── font/                           # Bundled Manrope
+    ├── raw/                            # faimess_demo.mp3 — the site's demo master
     └── values/                         # Strings and startup theme
 ```
 
@@ -48,6 +53,9 @@ app/src/main/
 - Modal sheets, the story dialog and the playlist page own their Android Back behavior. Back from a secondary tab returns Home before leaving the Activity.
 - `PlaylistScreen` is an overlay inside `FaimessScaffold`, drawn above the tab content and below the floating menu and the snackbar host. It receives the post and the shared `PostInteractions` (so likes, comments, options, sharing and author taps behave exactly as on the card), the other posts for its *more playlists* row, and reports play requests upward; nothing in it talks to audio. Choosing any tab closes it.
 - Sharing opens the real Android text share sheet; no fake remote post URL is generated and counters do not falsely increment when the chooser opens.
+- **Playback** lives in `PlayerViewModel` (an `AndroidViewModel` scoped to the Activity, so the session survives tab changes and the playlist page). It owns one `MediaPlayer` prepared from `res/raw/faimess_demo` with `USAGE_MEDIA` attributes, exposes `StateFlow<PlayerState>` (queue, index, playing, position/duration, repeat, shuffle, liked ids) and applies `play / playAll / shuffleAll / playAt / toggle / next / previous / seekTo / toggleRepeat / toggleShuffle / toggleLike`. A 250 ms ticker copies the engine's position into state while playing; `onCompletion` applies `PlayerLogic.nextIndex`. Audio focus is requested on start and abandoned on pause; a transient loss pauses and resumes on regain. If the engine cannot be created or reports an error, the session continues on a simulated clock (`SystemClock.elapsedRealtime`) with the catalogue length, so the interface and the device tests never depend on an audio route. The queue rules are pure (`PlayerLogic`) and unit tested. Playback ends with the Activity: there is no foreground service, media session or notification yet, and `PlayerState` is not persisted.
+- `FaimessScaffold` provides `LocalBottomChromeHeight` (menu height, plus the mini player's once a song is loaded) and the scrolling screens read it as bottom content padding. The bottom stack is a `Column`: `AnimatedVisibility(MiniPlayer)` above `FloatingNavigation`, hidden together while the keyboard is up. `PlayerScreen` is a full-size overlay above the stack and below the snackbar host; `playerOpen` is `rememberSaveable` and the screen owns its Back handling.
+- `PlaylistPlayback` (play all / shuffle / one song) is what the playlist page reports; `PostInteractions.onPlay` is the feed card's play glyph. Both resolve to `PlayerViewModel` calls in `FaimessApp` with the playlist as the queue and its name as the queue label.
 
 ## Where to change product requirements
 
