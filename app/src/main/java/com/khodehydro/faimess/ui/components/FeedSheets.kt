@@ -1,11 +1,11 @@
 package com.khodehydro.faimess.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -35,21 +35,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.data.DemoContent
 import com.khodehydro.faimess.model.FeedActions
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Person
+import com.khodehydro.faimess.model.Playlist
 import com.khodehydro.faimess.ui.theme.FlameDeep
 import com.khodehydro.faimess.ui.theme.Ink
 import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.PrimaryDeep
+import com.khodehydro.faimess.ui.theme.Subtle
 
 /** Secondary UI lives in dismissible native sheets; the launch surface remains the reference feed. */
-enum class FeedSheet { CreatePost, CreateStory, Comments, PostMenu, Notifications, Media }
+enum class FeedSheet { CreatePost, CreateStory, Comments, PostMenu, Notifications }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +81,6 @@ fun FeedBottomSheet(
             FeedSheet.Comments -> R.string.comments
             FeedSheet.PostMenu -> R.string.post_menu
             FeedSheet.Notifications -> R.string.notifications
-            FeedSheet.Media -> if (post?.isVideoPreview == true) R.string.video_preview else R.string.photo_preview
         }
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 20.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -106,7 +108,6 @@ fun FeedBottomSheet(
                     )
                 }
                 FeedSheet.Notifications -> Notifications(onPerson)
-                FeedSheet.Media -> post?.let { MediaPreview(it) }
             }
         }
     }
@@ -120,7 +121,11 @@ private fun Composer(isStory: Boolean, onPublish: (String) -> Boolean) {
         modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.composer_note), style = MaterialTheme.typography.bodyMedium, color = InkMuted)
+        Text(
+            stringResource(if (isStory) R.string.story_composer_note else R.string.composer_note),
+            style = MaterialTheme.typography.bodyMedium,
+            color = InkMuted,
+        )
         OutlinedTextField(
             value = draft,
             onValueChange = { if (it.length <= FeedActions.MAX_CAPTION_LENGTH) draft = it },
@@ -131,12 +136,7 @@ private fun Composer(isStory: Boolean, onPublish: (String) -> Boolean) {
             shape = RoundedCornerShape(18.dp),
             supportingText = { Text(stringResource(R.string.character_count, draft.length, FeedActions.MAX_CAPTION_LENGTH)) },
         )
-        OfflinePhoto(
-            R.drawable.forest_lake,
-            stringResource(R.string.photo_demo_note),
-            Modifier.fillMaxWidth().aspectRatio(2.4f).clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop,
-        )
+        if (!isStory) AttachedPlaylist(DemoContent.weekendReset)
         if (limitReached) Text(stringResource(R.string.demo_limit), color = FlameDeep, style = MaterialTheme.typography.bodySmall)
         Button(
             onClick = { limitReached = !onPublish(draft) },
@@ -219,19 +219,22 @@ private fun Notifications(onPerson: (Person) -> Unit) {
     }
 }
 
+/** The composer's attachment: the sample playlist a published demo post shares. */
 @Composable
-private fun MediaPreview(post: FeedPost) {
-    Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        OfflinePhoto(
-            post.image, post.imageDescription,
-            Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(24.dp)),
-            contentScale = ContentScale.Crop,
-        )
-        Text(post.author.name, style = MaterialTheme.typography.titleMedium)
-        Text(
-            stringResource(if (post.isVideoPreview) R.string.video_demo_note else R.string.photo_demo_note),
-            style = MaterialTheme.typography.bodyMedium,
-            color = InkMuted,
-        )
+private fun AttachedPlaylist(playlist: Playlist) {
+    val facts = playlistFacts(playlist)
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Subtle).padding(10.dp)
+            .semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PlaylistCover(playlist, 52.dp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(R.string.attached_playlist), style = MaterialTheme.typography.labelMedium, color = InkMuted)
+            Text(playlist.name, style = MaterialTheme.typography.titleSmall, color = Ink)
+            Text(facts, style = MaterialTheme.typography.bodySmall, color = InkMuted)
+        }
+        AppIcon(R.drawable.ic_queue_music, modifier = Modifier.size(22.dp), tint = PrimaryDeep)
     }
 }

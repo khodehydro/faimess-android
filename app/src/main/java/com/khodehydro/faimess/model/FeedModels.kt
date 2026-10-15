@@ -18,17 +18,41 @@ data class Story(
 @Immutable
 data class FeedComment(val author: String, val body: String)
 
+/** Mirrors the FAIMESS backend's track row (`/api/tracks`): id, title, artist, album, duration. */
+@Immutable
+data class Track(
+    val id: String,
+    val title: String,
+    val artist: String,
+    val album: String,
+    val seconds: Int,
+    @DrawableRes val cover: Int,
+)
+
+/**
+ * A listener-made playlist, as the FAIMESS backend stores it (`playlists`: name, mood, one of the
+ * site's bundled covers, and the tracks it references). The post that shares it names the owner.
+ */
+@Immutable
+data class Playlist(
+    val id: String,
+    val name: String,
+    val mood: String,
+    @DrawableRes val cover: Int,
+    val tracks: List<Track>,
+) {
+    val totalSeconds: Int get() = tracks.sumOf { it.seconds }
+}
+
 data class FeedPost(
     val id: String,
     val author: Person,
     val time: String,
     val caption: String,
-    @DrawableRes val image: Int,
-    val imageDescription: String,
+    val playlist: Playlist,
     val likes: Int,
     val commentCount: Int,
     val shares: Int,
-    val isVideoPreview: Boolean = false,
     val isLiked: Boolean = false,
     val isSaved: Boolean = false,
     val localComments: List<FeedComment> = emptyList(),
@@ -63,11 +87,18 @@ object FeedActions {
         )
     }
 
+    /** Matches the owner, the caption, the playlist's name or mood, and any track title or artist. */
     fun search(posts: List<FeedPost>, query: String): List<FeedPost> {
         val clean = query.trim()
-        return posts.filter {
-            clean.isEmpty() || it.author.name.contains(clean, ignoreCase = true) ||
-                it.caption.contains(clean, ignoreCase = true)
+        if (clean.isEmpty()) return posts
+        return posts.filter { post ->
+            post.author.name.contains(clean, ignoreCase = true) ||
+                post.caption.contains(clean, ignoreCase = true) ||
+                post.playlist.name.contains(clean, ignoreCase = true) ||
+                post.playlist.mood.contains(clean, ignoreCase = true) ||
+                post.playlist.tracks.any {
+                    it.title.contains(clean, ignoreCase = true) || it.artist.contains(clean, ignoreCase = true)
+                }
         }
     }
 }
@@ -83,4 +114,16 @@ private fun compactUnit(count: Int, divisor: Int, suffix: String): String {
     val whole = count / divisor
     val tenth = (count % divisor) / (divisor / 10)
     return if (whole < 10 && tenth > 0) "$whole.$tenth$suffix" else "$whole$suffix"
+}
+
+/** "3:28" — the track-row clock the site prints next to every song. */
+fun formatClock(seconds: Int): String {
+    val total = seconds.coerceAtLeast(0)
+    return "${total / 60}:${(total % 60).toString().padStart(2, '0')}"
+}
+
+/** "17 min" / "1 h 12 min" — a playlist's length, never shorter than one minute. */
+fun formatLength(seconds: Int): String {
+    val minutes = ((seconds.coerceAtLeast(0) + 30) / 60).coerceAtLeast(1)
+    return if (minutes < 60) "$minutes min" else "${minutes / 60} h ${minutes % 60} min"
 }

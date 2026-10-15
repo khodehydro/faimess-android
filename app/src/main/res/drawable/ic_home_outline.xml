@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Material Icons (Google, Apache License 2.0) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#202819" android:pathData="M10.2,3.8Q12,2.3 13.8,3.8L21,9.7V11.2Q21,12 20,12H19V19Q19,21 17,21H14V15H10V21H7Q5,21 5,19V12H4Q3,12 3,11.2V9.7Z" />
+    <path android:fillColor="#22252E" android:pathData="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" />
 </vector>

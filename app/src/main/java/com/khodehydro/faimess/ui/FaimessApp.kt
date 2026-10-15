@@ -57,6 +57,7 @@ import com.khodehydro.faimess.ui.components.StoryViewer
 import com.khodehydro.faimess.ui.screens.CalendarScreen
 import com.khodehydro.faimess.ui.screens.DiscoverScreen
 import com.khodehydro.faimess.ui.screens.HomeScreen
+import com.khodehydro.faimess.ui.screens.PlaylistScreen
 import com.khodehydro.faimess.ui.screens.ProfileScreen
 import com.khodehydro.faimess.ui.screens.SearchScreen
 import com.khodehydro.faimess.ui.theme.CanvasBackground
@@ -71,6 +72,7 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
     var sheet by rememberSaveable { mutableStateOf<FeedSheet?>(null) }
     var activePostId by rememberSaveable { mutableStateOf<String?>(null) }
     var storyPersonId by rememberSaveable { mutableStateOf<String?>(null) }
+    var openPlaylistPostId by rememberSaveable { mutableStateOf<String?>(null) }
     val homeListState = rememberLazyListState()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -98,12 +100,14 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
             onComments = { openPost(FeedSheet.Comments, it) },
             onShare = { postId -> feedViewModel.uiState.value.posts.find { it.id == postId }?.let(::share) },
             onOptions = { openPost(FeedSheet.PostMenu, it) },
-            onMedia = { openPost(FeedSheet.Media, it) },
+            onOpen = { openPlaylistPostId = it },
             onAuthor = ::openPerson,
         )
     }
 
-    BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null) { tab = FeedTab.Home }
+    BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null && openPlaylistPostId == null) {
+        tab = FeedTab.Home
+    }
 
     FaimessScaffold(
         state = state,
@@ -116,6 +120,9 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
         onStory = { storyPersonId = it.person.id },
         onAddStory = { sheet = FeedSheet.CreateStory },
         snackbar = snackbar,
+        openPlaylistPost = openPlaylistPostId?.let { id -> state.posts.find { it.id == id } },
+        onClosePlaylist = { openPlaylistPostId = null },
+        onPlay = { notify(R.string.playback_not_connected) },
     )
 
     val activePost = state.posts.find { it.id == activePostId }
@@ -164,6 +171,9 @@ private fun FaimessScaffold(
     onStory: (Story) -> Unit,
     onAddStory: () -> Unit,
     snackbar: SnackbarHostState,
+    openPlaylistPost: FeedPost? = null,
+    onClosePlaylist: () -> Unit = {},
+    onPlay: () -> Unit = {},
 ) {
     val screenState = rememberSaveableStateHolder()
     val ime = WindowInsets.ime
@@ -183,7 +193,7 @@ private fun FaimessScaffold(
                 screenState.SaveableStateProvider(tab.name) {
                     when (tab) {
                         FeedTab.Home -> HomeScreen(state, homeListState, interactions, onStory, onAddStory, Modifier.fillMaxSize())
-                        FeedTab.Discover -> DiscoverScreen(state.posts, interactions.onMedia, Modifier.fillMaxSize())
+                        FeedTab.Discover -> DiscoverScreen(state.posts, interactions.onOpen, Modifier.fillMaxSize())
                         FeedTab.Calendar -> CalendarScreen({ onTab(FeedTab.Discover) }, Modifier.fillMaxSize())
                         FeedTab.Profile -> ProfileScreen(state.posts, interactions, Modifier.fillMaxSize())
                         FeedTab.Search -> SearchScreen(state.posts, interactions, Modifier.fillMaxSize())
@@ -193,12 +203,17 @@ private fun FaimessScaffold(
             if (!keyboardVisible) {
                 FloatingNavigation(
                     tab, onTab,
-                    Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
+                    Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
                 )
+            }
+            // A playlist opens as a page over the feed and the menu; Back returns to where the user was.
+            openPlaylistPost?.let { post ->
+                PlaylistScreen(post, onClosePlaylist, interactions.onLike, onPlay, Modifier.fillMaxSize())
             }
             SnackbarHost(
                 snackbar,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 86.dp),
+                Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+                    .padding(bottom = if (keyboardVisible) 8.dp else if (openPlaylistPost != null) 16.dp else 86.dp),
             )
         }
     }
@@ -207,7 +222,7 @@ private fun FaimessScaffold(
 private fun sharePost(context: Context, post: FeedPost): Boolean = try {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_text, post.author.name, post.caption))
+        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_text, post.author.name, post.playlist.name, post.caption))
     }
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_chooser)))
     true

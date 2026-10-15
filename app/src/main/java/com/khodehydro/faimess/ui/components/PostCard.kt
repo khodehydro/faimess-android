@@ -12,14 +12,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -48,15 +47,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Person
+import com.khodehydro.faimess.model.Playlist
 import com.khodehydro.faimess.model.compactCount
 import com.khodehydro.faimess.ui.theme.Heart
 import com.khodehydro.faimess.ui.theme.Ink
 import com.khodehydro.faimess.ui.theme.InkMuted
+import com.khodehydro.faimess.ui.theme.Primary
 import com.khodehydro.faimess.ui.theme.PrimaryDeep
 import com.khodehydro.faimess.ui.theme.Subtle
 
@@ -67,7 +69,7 @@ data class PostInteractions(
     val onComments: (String) -> Unit,
     val onShare: (String) -> Unit,
     val onOptions: (String) -> Unit,
-    val onMedia: (String) -> Unit,
+    val onOpen: (String) -> Unit,
     val onAuthor: (Person) -> Unit,
 )
 
@@ -77,7 +79,7 @@ private data class PostClickActions(
     val comments: () -> Unit,
     val share: () -> Unit,
     val options: () -> Unit,
-    val media: () -> Unit,
+    val open: () -> Unit,
     val author: () -> Unit,
 )
 
@@ -91,7 +93,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             comments = { interactions.onComments(postId) },
             share = { interactions.onShare(postId) },
             options = { interactions.onOptions(postId) },
-            media = { interactions.onMedia(postId) },
+            open = { interactions.onOpen(postId) },
             author = { interactions.onAuthor(author) },
         )
     }
@@ -101,13 +103,13 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
         color = Color.White,
     ) {
         Column(Modifier.padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 3.dp)) {
-            // Header, caption and media only receive the fields they render. A like/comment update
+            // Header, caption and playlist only receive the fields they render. A like/comment update
             // can recompose the footer without rebuilding these more expensive, unchanged children.
             PostAuthorHeader(author, post.time, clicks.author, clicks.options)
             Spacer(Modifier.height(9.dp))
             ExpandableCaption(post.caption, postId)
             Spacer(Modifier.height(13.dp))
-            PostMedia(postId, post.image, post.imageDescription, post.isVideoPreview, clicks.media)
+            PlaylistPanel(postId, post.playlist, clicks.open)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -167,39 +169,45 @@ private fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit,
     }
 }
 
+/** The post's body: the shared playlist's name, facts and first songs. Tapping it opens the playlist. */
 @Composable
-private fun PostMedia(
-    postId: String,
-    @DrawableRes image: Int,
-    imageDescription: String,
-    isVideoPreview: Boolean,
-    onClick: () -> Unit,
-) {
-    val description = stringResource(
-        if (isVideoPreview) R.string.video_preview_description else R.string.photo_preview_description,
-        imageDescription,
-    )
-    Box(
-        modifier = Modifier.fillMaxWidth().aspectRatio(1.4f).clip(RoundedCornerShape(21.dp))
+private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Unit) {
+    val description = stringResource(R.string.open_playlist, playlist.name)
+    val facts = playlistFacts(playlist)
+    Column(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp)).background(Subtle)
             .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = description }
-            .testTag("media_$postId"),
+            .testTag("playlist_$postId").padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        OfflinePhoto(image, null, Modifier.matchParentSize())
-        if (isVideoPreview) {
-            Box(
-                Modifier.align(Alignment.Center).size(49.dp).background(Color.White.copy(alpha = 0.25f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                AppIcon(R.drawable.ic_play, modifier = Modifier.padding(start = 3.dp).size(23.dp), tint = Color.White)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PlaylistCover(playlist, 56.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(playlist.name, style = MaterialTheme.typography.titleMedium, color = Ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(facts, style = MaterialTheme.typography.bodySmall, color = InkMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            AppIcon(
-                R.drawable.ic_volume,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).size(15.dp),
-                tint = Color.White,
+            AppIcon(R.drawable.ic_play_circle, modifier = Modifier.size(36.dp), tint = Primary)
+        }
+        playlist.tracks.take(PREVIEW_TRACKS).forEachIndexed { index, track ->
+            TrackRow(index + 1, track, compact = true)
+        }
+        val hidden = playlist.tracks.size - PREVIEW_TRACKS
+        if (hidden > 0) {
+            Text(
+                pluralStringResource(R.plurals.more_tracks, hidden, hidden),
+                style = MaterialTheme.typography.labelMedium,
+                color = PrimaryDeep,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
             )
         }
     }
 }
+
+private const val PREVIEW_TRACKS = 4
 
 @Composable
 private fun EngagementButton(

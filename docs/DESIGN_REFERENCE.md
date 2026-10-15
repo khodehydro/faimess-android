@@ -1,5 +1,16 @@
 # Reference design
 
+## Playlist feed and navigation (milestone 03) — taken from the FAIMESS web app
+
+The home feed now shows **playlists made by listeners** instead of photos, and the bottom menu follows the site's navigation rules. Everything below was read from `khodehydro/faimess-doc` (branch `arena/01a10c49-faimess-doc`, commit `c575e7c`):
+
+- **Post card:** the header, expandable caption and like / comment / share row are unchanged. The 1.4 : 1 photo was replaced by a *playlist panel* on the same `Subtle` background with the same 21 dp radius: a 56 dp cover (12 dp radius), the playlist name, the site's facts line `N tracks · M min · Mood` (`BrowseDetailView.tsx`: `minutesOf` rounds the total and never prints less than one minute), a primary-purple play-circle glyph, the first four songs as track rows, and `+n more tracks` in primary-deep. Tapping the panel opens the playlist page.
+- **Track row:** the site's detail-page row (`rounded-[14px] border line/80 bg-surface px-2.5 py-2 gap-2.5`): index in faint tabular label text, square artwork (36 dp in the card, 44 dp on the page, 10/12 dp radius), bold title, `artist · album` in semibold muted text, and the `m:ss` clock at the end.
+- **Playlist page (`PlaylistScreen`):** white circular back button, then the detail card — 76 dp cover with 18 dp radius, headline name, avatar + `by <owner>`, facts — and the controls row: filled `Play` pill, outlined `Shuffle` pill, and a like pill that toggles the same like as the feed card. `TRACKS` + count label, then every song as a track row. The page covers the feed and the menu; the back button and the system Back gesture close it.
+- **Bottom menu:** the site's `MobileNav` keeps the active item in primary with the glyph "filled" by a heavier stroke. Android uses Material Icons pairs instead — `*_outline` for idle tabs and `*_filled` for the selected one — inside the same translucent white capsule. The capsule holds Home / Discover / Calendar / Profile (4 × 48 dp + 7 dp padding, at most 236 dp wide); **Search is a separate 62 dp circle** with the same height, shadow and hairline, 10 dp to the end of the capsule. On a 320 dp phone the capsule shrinks to 206 dp so the pair still fits the 16 dp gutters.
+- **Demo catalogue:** tracks, artists, albums, durations and artwork are the site's own demo data (`src/data/feed.ts`, `src/data/player.ts`, `src/assets/photos/{albums,playlists}`); playlist names, moods and covers follow `src/data/library.ts` / `server/db.ts`. Model fields mirror the backend rows (`tracks`: id, title, artist, album, seconds; `playlists`: name, curator, mood, photo, track ids).
+- **Not changed on purpose:** stories, people, the composer flow, the Manrope typeface and the set of tabs. Audio playback is not wired: Play, Shuffle and track taps show a snackbar saying so.
+
 ## Brand (milestone 02) — taken from the FAIMESS web app
 
 The name, logo and colours come from the FAIMESS website repository (`khodehydro/faimess-doc`, branch `arena/01a10c49-faimess-doc`), not from the first milestone's screenshot:
@@ -32,9 +43,9 @@ The user supplied a Frindle social-feed screenshot. The first milestone reproduc
 1. White header: brand mark, bold wordmark, quiet circular create and notification controls, unread dot. (Now the FAIMESS cat logo, `FAIMESS`, and a primary-purple dot.)
 2. Horizontally scrolling stories: Me, Marcus, Abdullah, Sienna, Alex, Joanna. Gradient rings (now primary-deep → primary → teal, the site's unseen-story ring), self-story add badge, demo LIVE badge.
 3. Cool, almost-white feed canvas with generous rounded white cards.
-4. Sienna post first: small avatar, name, time, public globe; two-line expandable travel caption; green mountain ridge thumbnail with translucent play affordance and small speaker icon; red heart, comments and share totals.
+4. Sienna post first: small avatar, name, time, public globe; two-line expandable caption; the media area (a landscape thumbnail with a play affordance in milestone 01, a playlist panel with four track rows since milestone 03); red heart, comments and share totals.
 5. Esther Howard post next, visible below the first card.
-6. Centered, translucent capsule navigation over the feed, with five circular controls and a filled Home selection. (Now a white glass capsule with the selection in brand purple, like the site's bottom menu.) Icons remain unlabeled visually as in the reference, with accessible labels and selection semantics.
+6. Centered, translucent capsule navigation over the feed, with circular controls and a filled Home selection. (Now a white glass capsule of four tabs with the selection in brand purple, plus a separate search circle, like the site's bottom menu.) Icons remain unlabeled visually as in the reference, with accessible labels and selection semantics.
 
 ## Layout tokens
 
@@ -44,17 +55,17 @@ The user supplied a Frindle social-feed screenshot. The first milestone reproduc
 | Header | 70 dp |
 | Feed gutters | 16 dp |
 | Post corner radius | 27 dp |
-| Photo corner radius | 21 dp |
-| Media aspect ratio | 1.4 : 1 |
+| Playlist panel radius | 21 dp (track rows 14 dp, thumbs 10–12 dp) |
+| Panel cover / page cover | 56 dp / 76 dp |
 | Story ring / photo | 57 / 50 dp |
-| Bottom capsule | Up to 284 dp; 48 dp interactive circles |
+| Bottom capsule | Up to 236 dp + 10 dp gap + 62 dp search circle; 48 dp interactive circles |
 | Content column | Centered, at most 600 dp on wide displays |
 
 ## Intentional differences and limits
 
 - The screenshot's iPhone bezel, notch, time and OS icons are not app content. Android supplies its own status/navigation bars, and the app respects those insets.
 - The original photo files and original design measurements were not available. Similar original AI-generated photos and approximate proportions are used; this is not a claim of pixel-identical source imagery.
-- The first card is a **still-image video preview**, not a real player. Opening it explains this. LIVE is also explicitly identified as a demo in the story viewer.
+- Nothing plays audio yet: Play, Shuffle and track taps explain this in a snackbar instead of pretending. LIVE is also explicitly identified as a demo in the story viewer.
 - The floating bar uses a translucent gradient, not an expensive real-time blur; this is consistent from API 26 upward.
 - Secondary tab screens are intentionally lightweight demo destinations, not final product requirements. The calendar is an honest empty state.
 - The launch appearance stays light and English even when the system uses dark mode. Dynamic color and RTL have not been introduced because they would change the reference layout.
@@ -62,6 +73,6 @@ The user supplied a Frindle social-feed screenshot. The first milestone reproduc
 
 ## Replacing visuals later
 
-Change local fixtures in `data/DemoContent.kt`; change colors/typography in `ui/theme`; replace WebP assets under `res/drawable-nodpi`; a new logo goes to `res/drawable-nodpi/brand_logo.png` followed by `python3 tools/brand_assets.py`. See [ARCHITECTURE.md](ARCHITECTURE.md) for the component map.
+Change local fixtures (tracks, playlists, posts) in `data/DemoContent.kt`; change colors/typography in `ui/theme`; replace WebP assets under `res/drawable-nodpi` (`album_*`, `playlist_*`, avatars, story scenes); a new logo goes to `res/drawable-nodpi/brand_logo.png` followed by `python3 tools/brand_assets.py`. See [ARCHITECTURE.md](ARCHITECTURE.md) for the component map.
 
 Android Studio previews in `FaimessApp.kt` cover a 393 dp phone, 320 dp compact phone, and 1.5× text. CI captures the actual rendered Compose home screen into the `app-screenshots` artifact.

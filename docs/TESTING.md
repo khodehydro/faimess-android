@@ -32,7 +32,8 @@ Use `gradlew.bat` instead on Windows. Tests are under `app/src/test` and `app/sr
 
 - Immutable/reversible likes and saved posts, non-negative counts.
 - Comment whitespace/length validation and count updates.
-- Compact label boundaries and case-insensitive author/caption search.
+- Compact label boundaries; case-insensitive search over owner, caption, playlist name/mood and track title/artist.
+- `formatClock` / `formatLength` (`3:28`, `20 min`, `1 h 12 min`) and the demo playlists only referencing catalogue tracks.
 - Initial offline fixtures; publish ordering and validation.
 - State reconstruction from a new SavedStateHandle.
 - Unknown IDs, bounded local post/comment storage, invalid story input.
@@ -45,9 +46,11 @@ Use `gradlew.bat` instead on Windows. Tests are under `app/src/test` and `app/sr
 - Comment entry and blank-input prevention.
 - Publish flow and blank-input prevention.
 - Saving and retrieving a post from Profile.
-- All five navigation destinations.
+- All five navigation destinations; the selected tab is the only one marked selected, and Search lives outside the capsule.
 - Search empty state and clearing the query.
-- Explicit still-image video-preview behavior.
+- Opening a playlist from its card: the page shows songs hidden behind "+n more tracks", Play reports that playback is not connected, back returns to the feed.
+- Liking on the playlist page updates the same like on the feed card (system Back closes the page).
+- Discover tiles open the same playlist page.
 - Capture of the actual rendered home screen (`home.png`).
 
 ## GitHub Actions

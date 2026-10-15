@@ -32,7 +32,7 @@ fun CalendarScreen(onDiscover: () -> Unit, modifier: Modifier = Modifier) {
         Text(stringResource(R.string.calendar_subtitle), style = MaterialTheme.typography.bodyMedium, color = InkMuted)
         Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), color = Color.White) {
             EmptyState(
-                R.drawable.ic_calendar,
+                R.drawable.ic_calendar_outline,
                 stringResource(R.string.no_plans),
                 stringResource(R.string.no_plans_description),
                 action = {

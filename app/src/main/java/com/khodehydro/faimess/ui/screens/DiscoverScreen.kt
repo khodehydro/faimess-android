@@ -32,8 +32,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
@@ -43,7 +47,7 @@ import com.khodehydro.faimess.ui.components.OfflinePhoto
 import com.khodehydro.faimess.ui.theme.InkMuted
 
 @Composable
-fun DiscoverScreen(posts: List<FeedPost>, onMedia: (String) -> Unit, modifier: Modifier = Modifier) {
+fun DiscoverScreen(posts: List<FeedPost>, onOpen: (String) -> Unit, modifier: Modifier = Modifier) {
     var savedOnly by rememberSaveable { mutableStateOf(false) }
     val visiblePosts = remember(posts, savedOnly) {
         if (savedOnly) posts.filter { it.isSaved } else posts
@@ -70,20 +74,41 @@ fun DiscoverScreen(posts: List<FeedPost>, onMedia: (String) -> Unit, modifier: M
                 EmptyState(R.drawable.ic_bookmark, stringResource(R.string.no_saved), stringResource(R.string.no_saved_description))
             }
         }
-        items(visiblePosts, key = { it.id }, contentType = { "post_thumbnail" }) { post ->
+        items(visiblePosts, key = { it.id }, contentType = { "playlist_tile" }) { post ->
+            val playlist = post.playlist
+            val description = stringResource(R.string.open_playlist, playlist.name)
             Box(
                 Modifier.fillMaxWidth().aspectRatio(0.78f).clip(RoundedCornerShape(24.dp))
-                    .clickable(role = Role.Button, onClick = { onMedia(post.id) }),
+                    .clickable(role = Role.Button, onClick = { onOpen(post.id) })
+                    .semantics { contentDescription = description }
+                    .testTag("tile_${post.id}"),
             ) {
-                OfflinePhoto(post.image, post.imageDescription, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f)))))
-                Row(
+                OfflinePhoto(playlist.cover, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.55f)))))
+                Column(
                     Modifier.align(Alignment.BottomStart).padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Avatar(post.author, 24.dp)
-                    Text(post.author.name, style = MaterialTheme.typography.labelMedium, color = Color.White)
+                    Text(
+                        playlist.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Avatar(post.author, 20.dp)
+                        Text(
+                            stringResource(
+                                R.string.tile_facts, post.author.name,
+                                pluralStringResource(R.plurals.track_count, playlist.tracks.size, playlist.tracks.size),
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.9f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }
