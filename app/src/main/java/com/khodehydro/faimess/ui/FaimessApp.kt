@@ -65,13 +65,7 @@ import com.khodehydro.faimess.ui.components.MiniPlayer
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.components.PreloadFeedPhotos
 import com.khodehydro.faimess.ui.components.StoryViewer
-import com.khodehydro.faimess.ui.screens.CalendarScreen
-import com.khodehydro.faimess.ui.screens.DiscoverScreen
-import com.khodehydro.faimess.ui.screens.HomeScreen
-import com.khodehydro.faimess.ui.screens.PlayerScreen
-import com.khodehydro.faimess.ui.screens.PlaylistScreen
-import com.khodehydro.faimess.ui.screens.ProfileScreen
-import com.khodehydro.faimess.ui.screens.SearchScreen
+import com.khodehydro.faimess.ui.screens.*
 import com.khodehydro.faimess.ui.theme.CanvasBackground
 import com.khodehydro.faimess.ui.theme.FaimessTheme
 import kotlinx.coroutines.launch
@@ -80,6 +74,9 @@ import kotlinx.coroutines.launch
 fun FaimessApp(
     feedViewModel: FeedViewModel = viewModel(),
     playbackViewModel: PlaybackViewModel = viewModel(),
+    libraryViewModel: LibraryViewModel = viewModel(),
+    socialViewModel: SocialViewModel = viewModel(),
+    newsShopViewModel: NewsShopViewModel = viewModel(),
 ) {
     PreloadFeedPhotos()
     val state by feedViewModel.uiState.collectAsStateWithLifecycle()
@@ -90,6 +87,15 @@ fun FaimessApp(
     var storyPersonId by rememberSaveable { mutableStateOf<String?>(null) }
     var openPlaylistPostId by rememberSaveable { mutableStateOf<String?>(null) }
     var openPlayer by rememberSaveable { mutableStateOf(false) }
+    // New screen navigation
+    var openArtists by rememberSaveable { mutableStateOf(false) }
+    var openAlbums by rememberSaveable { mutableStateOf(false) }
+    var openNews by rememberSaveable { mutableStateOf(false) }
+    var openShop by rememberSaveable { mutableStateOf(false) }
+    var openBadges by rememberSaveable { mutableStateOf(false) }
+    var openLeaderboard by rememberSaveable { mutableStateOf(false) }
+    var openLyricsSubmit by rememberSaveable { mutableStateOf<String?>(null) }
+    var openUserProfile by rememberSaveable { mutableStateOf<String?>(null) }
     val homeListState = rememberLazyListState()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -153,6 +159,14 @@ fun FaimessApp(
         onMiniPlayerToggle = { playbackViewModel.togglePlayPause() },
         onMiniPlayerNext = { playbackViewModel.next() },
         onOpenPlayer = { openPlayer = true },
+        onOpenArtists = { openArtists = true },
+        onOpenAlbums = { openAlbums = true },
+        onOpenNews = { openNews = true },
+        onOpenShop = { openShop = true },
+        onOpenBadges = { openBadges = true },
+        onOpenLeaderboard = { openLeaderboard = true },
+        onOpenUserProfile = { openUserProfile = it; socialViewModel.viewProfile(it) },
+        onOpenLyricsSubmit = { openLyricsSubmit = it },
     )
 
     val activePost = state.posts.find { it.id == activePostId }
@@ -209,6 +223,46 @@ fun FaimessApp(
             modifier = Modifier.fillMaxSize(),
         )
     }
+
+    // Full-screen overlay: Artists
+    AnimatedVisibility(visible = openArtists, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        ArtistsScreen(vm = libraryViewModel, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: Albums
+    AnimatedVisibility(visible = openAlbums, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        AlbumsScreen(vm = libraryViewModel, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: News
+    AnimatedVisibility(visible = openNews, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        NewsScreen(vm = newsShopViewModel, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: Shop
+    AnimatedVisibility(visible = openShop, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        ShopScreen(vm = newsShopViewModel, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: Badges & Points
+    AnimatedVisibility(visible = openBadges, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        BadgesPointsScreen(vm = socialViewModel, onBack = { openBadges = false }, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: Leaderboard
+    AnimatedVisibility(visible = openLeaderboard, enter = slideInVertically(tween(300)) { it } + fadeIn(tween(300)), exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250))) {
+        LeaderboardScreen(vm = socialViewModel, onBack = { openLeaderboard = false }, onSelectUser = { openUserProfile = it }, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: Lyrics Submission
+    openLyricsSubmit?.let { trackId ->
+        LyricsSubmissionScreen(vm = socialViewModel, trackId = trackId, trackTitle = playbackViewModel.state.collectAsStateWithLifecycle().value.currentTrack?.title ?: "Track", onBack = { openLyricsSubmit = null }, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
+
+    // Full-screen overlay: User Profile
+    openUserProfile?.let { username ->
+        UserProfileScreen(vm = socialViewModel, onBack = { openUserProfile = null; socialViewModel.clearViewedProfile() }, onNavigateToBadges = { openBadges = true }, onNavigateToLeaderboard = { openLeaderboard = true }, modifier = Modifier.fillMaxSize().background(Color.White))
+    }
 }
 
 @Composable
@@ -231,6 +285,14 @@ private fun FaimessScaffold(
     onMiniPlayerToggle: () -> Unit = {},
     onMiniPlayerNext: () -> Unit = {},
     onOpenPlayer: () -> Unit = {},
+    onOpenArtists: () -> Unit = {},
+    onOpenAlbums: () -> Unit = {},
+    onOpenNews: () -> Unit = {},
+    onOpenShop: () -> Unit = {},
+    onOpenBadges: () -> Unit = {},
+    onOpenLeaderboard: () -> Unit = {},
+    onOpenUserProfile: (String) -> Unit = {},
+    onOpenLyricsSubmit: (String) -> Unit = {},
 ) {
     val screenState = rememberSaveableStateHolder()
     val ime = WindowInsets.ime
