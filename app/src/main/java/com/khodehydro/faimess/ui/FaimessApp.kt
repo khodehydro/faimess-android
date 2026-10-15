@@ -4,6 +4,12 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,17 +52,20 @@ import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.FeedUiState
 import com.khodehydro.faimess.model.Person
 import com.khodehydro.faimess.model.Story
+import com.khodehydro.faimess.model.Track
 import com.khodehydro.faimess.ui.components.AppHeader
 import com.khodehydro.faimess.ui.components.FeedBottomSheet
 import com.khodehydro.faimess.ui.components.FeedSheet
 import com.khodehydro.faimess.ui.components.FeedTab
 import com.khodehydro.faimess.ui.components.FloatingNavigation
+import com.khodehydro.faimess.ui.components.MiniPlayer
 import com.khodehydro.faimess.ui.components.PostInteractions
 import com.khodehydro.faimess.ui.components.PreloadFeedPhotos
 import com.khodehydro.faimess.ui.components.StoryViewer
 import com.khodehydro.faimess.ui.screens.CalendarScreen
 import com.khodehydro.faimess.ui.screens.DiscoverScreen
 import com.khodehydro.faimess.ui.screens.HomeScreen
+import com.khodehydro.faimess.ui.screens.PlayerScreen
 import com.khodehydro.faimess.ui.screens.PlaylistScreen
 import com.khodehydro.faimess.ui.screens.ProfileScreen
 import com.khodehydro.faimess.ui.screens.SearchScreen
@@ -65,14 +74,19 @@ import com.khodehydro.faimess.ui.theme.FaimessTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
+fun FaimessApp(
+    feedViewModel: FeedViewModel = viewModel(),
+    playbackViewModel: PlaybackViewModel = viewModel(),
+) {
     PreloadFeedPhotos()
     val state by feedViewModel.uiState.collectAsStateWithLifecycle()
+    val playerState by playbackViewModel.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(FeedTab.Home) }
     var sheet by rememberSaveable { mutableStateOf<FeedSheet?>(null) }
     var activePostId by rememberSaveable { mutableStateOf<String?>(null) }
     var storyPersonId by rememberSaveable { mutableStateOf<String?>(null) }
     var openPlaylistPostId by rememberSaveable { mutableStateOf<String?>(null) }
+    var openPlayer by rememberSaveable { mutableStateOf(false) }
     val homeListState = rememberLazyListState()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -91,6 +105,12 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
     fun share(post: FeedPost) {
         if (!sharePost(context, post)) notify(R.string.share_unavailable)
     }
+    fun playTrack(track: Track, playlist: List<Track>) {
+        playbackViewModel.play(track, playlist)
+    }
+    fun playPlaylist(playlist: List<Track>) {
+        if (playlist.isNotEmpty()) playbackViewModel.play(playlist.first(), playlist)
+    }
 
     // These handlers only capture the ViewModel, context and stable MutableState delegates.
     // Reuse them across likes, comments, overlays and tab changes so unchanged cards can skip work.
@@ -105,12 +125,13 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
         )
     }
 
-    BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null && openPlaylistPostId == null) {
+    BackHandler(enabled = tab != FeedTab.Home && sheet == null && storyPersonId == null && openPlaylistPostId == null && !openPlayer) {
         tab = FeedTab.Home
     }
 
     FaimessScaffold(
         state = state,
+        playerState = playerState,
         tab = tab,
         // The menu stays visible on the playlist page; choosing any tab leaves the page.
         onTab = { tab = it; openPlaylistPostId = null },
@@ -123,7 +144,11 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
         snackbar = snackbar,
         openPlaylistPost = openPlaylistPostId?.let { id -> state.posts.find { it.id == id } },
         onClosePlaylist = { openPlaylistPostId = null },
-        onPlay = { notify(R.string.playback_not_connected) },
+        onPlay = { playlist -> playPlaylist(playlist) },
+        onPlayTrack = { track, playlist -> playTrack(track, playlist) },
+        onMiniPlayerToggle = { playbackViewModel.togglePlayPause() },
+        onMiniPlayerNext = { playbackViewModel.next() },
+        onOpenPlayer = { openPlayer = true },
     )
 
     val activePost = state.posts.find { it.id == activePostId }
@@ -158,11 +183,33 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
     storyPersonId?.let { id ->
         StoryViewer(state.stories, id, onDismiss = { storyPersonId = null })
     }
+
+    // Full-screen player overlay
+    AnimatedVisibility(
+        visible = openPlayer && playerState.hasTrack,
+        enter = slideInVertically(tween(350)) { -it / 3 } + fadeIn(tween(350)),
+        exit = slideOutVertically(tween(300)) { -it / 3 } + fadeOut(tween(300)),
+    ) {
+        PlayerScreen(
+            state = playerState,
+            onBack = { openPlayer = false },
+            onTogglePlayPause = { playbackViewModel.togglePlayPause() },
+            onNext = { playbackViewModel.next() },
+            onPrevious = { playbackViewModel.previous() },
+            onSeek = { playbackViewModel.seekTo(it) },
+            onShuffle = { playbackViewModel.toggleShuffle() },
+            onRepeat = { playbackViewModel.toggleRepeat() },
+            onFavourite = { playbackViewModel.toggleFavourite() },
+            onPlayTrack = { track -> playTrack(track, playerState.playlist) },
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
 }
 
 @Composable
 private fun FaimessScaffold(
     state: FeedUiState,
+    playerState: PlayerUiState,
     tab: FeedTab,
     onTab: (FeedTab) -> Unit,
     homeListState: LazyListState,
@@ -174,7 +221,11 @@ private fun FaimessScaffold(
     snackbar: SnackbarHostState,
     openPlaylistPost: FeedPost? = null,
     onClosePlaylist: () -> Unit = {},
-    onPlay: () -> Unit = {},
+    onPlay: (List<Track>) -> Unit = {},
+    onPlayTrack: (Track, List<Track>) -> Unit = { _, _ -> },
+    onMiniPlayerToggle: () -> Unit = {},
+    onMiniPlayerNext: () -> Unit = {},
+    onOpenPlayer: () -> Unit = {},
 ) {
     val screenState = rememberSaveableStateHolder()
     val ime = WindowInsets.ime
@@ -205,9 +256,28 @@ private fun FaimessScaffold(
             // to where the user was. Other posts' playlists are offered further down the page.
             openPlaylistPost?.let { post ->
                 val suggestions = remember(state.posts, post.id) { state.posts.filter { it.id != post.id }.take(6) }
-                PlaylistScreen(post, suggestions, interactions, onClosePlaylist, onPlay, Modifier.fillMaxSize())
+                PlaylistScreen(
+                    post, suggestions, interactions, onClosePlaylist,
+                    onPlay = { onPlay(post.playlist.tracks) },
+                    onPlayTrack = { track -> onPlayTrack(track, post.playlist.tracks) },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             if (!keyboardVisible) {
+                // Mini player above the floating nav when a track is loaded
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 86.dp),
+                ) {
+                    MiniPlayer(
+                        state = playerState,
+                        onTogglePlayPause = onMiniPlayerToggle,
+                        onNext = onMiniPlayerNext,
+                        onOpen = onOpenPlayer,
+                    )
+                }
                 FloatingNavigation(
                     tab, onTab,
                     Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -240,6 +310,7 @@ private fun ReferenceFeedPreview() {
     FaimessTheme {
         FaimessScaffold(
             state = FeedUiState(DemoContent.posts, DemoContent.stories),
+            playerState = PlayerUiState(),
             tab = FeedTab.Home,
             onTab = {},
             homeListState = rememberLazyListState(),

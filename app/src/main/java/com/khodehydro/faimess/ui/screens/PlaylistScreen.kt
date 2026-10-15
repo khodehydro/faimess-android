@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Playlist
+import com.khodehydro.faimess.model.Track
 import com.khodehydro.faimess.model.compactCount
 import com.khodehydro.faimess.model.formatLength
 import com.khodehydro.faimess.ui.components.AppIcon
@@ -95,6 +96,7 @@ fun PlaylistScreen(
     interactions: PostInteractions,
     onBack: () -> Unit,
     onPlay: () -> Unit,
+    onPlayTrack: (Track) -> Unit = { onPlay() },
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -123,7 +125,7 @@ fun PlaylistScreen(
                 )
             }
             itemsIndexed(playlist.tracks, key = { index, track -> "${track.id}-$index" }, contentType = { _, _ -> "track" }) { index, track ->
-                TrackRow(index + 1, track, Modifier.testTag("track_${track.id}"), onClick = onPlay)
+                TrackRow(index + 1, track, Modifier.testTag("track_${track.id}"), onClick = { onPlayTrack(track) })
             }
             item(key = "artists", contentType = "artists") {
                 Spacer(Modifier.height(6.dp))
