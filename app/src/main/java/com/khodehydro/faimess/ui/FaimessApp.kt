@@ -256,7 +256,7 @@ fun FaimessApp(
 
     // Full-screen overlay: Lyrics Submission
     openLyricsSubmit?.let { trackId ->
-        LyricsSubmissionScreen(vm = socialViewModel, trackId = trackId, trackTitle = playbackViewModel.state.collectAsStateWithLifecycle().value.currentTrack?.title ?: "Track", onBack = { openLyricsSubmit = null }, modifier = Modifier.fillMaxSize().background(Color.White))
+        LyricsSubmissionScreen(vm = socialViewModel, trackId = trackId, trackTitle = playbackViewModel.state.collectAsStateWithLifecycle().value.track?.title ?: "Track", onBack = { openLyricsSubmit = null }, modifier = Modifier.fillMaxSize().background(Color.White))
     }
 
     // Full-screen overlay: User Profile
