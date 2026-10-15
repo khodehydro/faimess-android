@@ -33,6 +33,11 @@
     <string name="back">Back</string>
     <string name="playback_not_connected">Playback is not connected in this version yet. The player is the next milestone.</string>
     <string name="attached_playlist">Attached playlist</string>
+    <string name="share_playlist">Share playlist</string>
+    <string name="artists_section">ARTISTS</string>
+    <string name="more_playlists_section">MORE PLAYLISTS</string>
+    <string name="comments_section">COMMENTS</string>
+    <string name="add_comment">Add a comment</string>
     <string name="close">Close</string>
     <string name="previous_story">Previous story</string>
     <string name="next_story">Next story</string>
@@ -96,6 +101,10 @@
     <plurals name="track_count">
         <item quantity="one">%d track</item>
         <item quantity="other">%d tracks</item>
+    </plurals>
+    <plurals name="song_count">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
     </plurals>
     <plurals name="more_tracks">
         <item quantity="one">+%d more track</item>

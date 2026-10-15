@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -105,10 +106,16 @@ fun TrackRow(
     }
 }
 
-/** A small square cover with the site's 12 dp thumb radius. */
+/** A square cover with the site's thumb radius, or any other [shape] (the page header uses a circle). */
 @Composable
-fun PlaylistCover(playlist: Playlist, size: Dp, modifier: Modifier = Modifier, radius: Dp = 14.dp) {
-    Box(modifier.size(size).clip(RoundedCornerShape(radius))) {
+fun PlaylistCover(
+    playlist: Playlist,
+    size: Dp,
+    modifier: Modifier = Modifier,
+    radius: Dp = 14.dp,
+    shape: Shape = RoundedCornerShape(radius),
+) {
+    Box(modifier.size(size).clip(shape)) {
         OfflinePhoto(playlist.cover, null, Modifier.size(size))
     }
 }

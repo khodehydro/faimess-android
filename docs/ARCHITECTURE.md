@@ -46,7 +46,7 @@ app/src/main/
 - Selected tab, active sheet/story, the open playlist post (`openPlaylistPostId`) and text drafts use `rememberSaveable`. A `SaveableStateHolder` retains independent tab UI state and the home list retains its scroll position.
 - Home uses `LazyColumn` / stories use `LazyRow` with stable IDs; Discover uses `LazyVerticalGrid`.
 - Modal sheets, the story dialog and the playlist page own their Android Back behavior. Back from a secondary tab returns Home before leaving the Activity.
-- `PlaylistScreen` is an overlay inside `FaimessScaffold`, drawn above the tab content and the floating menu and below the snackbar host. It receives the post (so likes stay in sync with the card) and reports play requests upward; nothing in it talks to audio.
+- `PlaylistScreen` is an overlay inside `FaimessScaffold`, drawn above the tab content and below the floating menu and the snackbar host. It receives the post and the shared `PostInteractions` (so likes, comments, options, sharing and author taps behave exactly as on the card), the other posts for its *more playlists* row, and reports play requests upward; nothing in it talks to audio. Choosing any tab closes it.
 - Sharing opens the real Android text share sheet; no fake remote post URL is generated and counters do not falsely increment when the chooser opens.
 
 ## Where to change product requirements
@@ -55,7 +55,7 @@ app/src/main/
 | --- | --- |
 | Change logo/name | Replace `res/drawable-nodpi/brand_logo.png`, run `python3 tools/brand_assets.py`, edit `app_name` in `strings.xml` |
 | Change brand colours | `ui/theme/Color.kt` (mirrors the web app's `@theme` tokens) and `res/values/colors.xml` |
-| Change post layout | `PostCard.kt` (card) and `TrackRow.kt` (track rows, cover, facts) |
+| Change post layout | `PostCard.kt` (card; `PostAuthorHeader` and `PostEngagementRow` are shared with the playlist page) and `TrackRow.kt` (track rows, cover, facts) |
 | Change the playlist page | `screens/PlaylistScreen.kt` |
 | Change nav icons | The `FeedTab` pairs in `FloatingNavigation.kt` (`*_outline` idle, `*_filled` selected) |
 | Add/remove a tab | `FeedTab` in `FloatingNavigation.kt` and `FaimessScaffold` in `FaimessApp.kt` |

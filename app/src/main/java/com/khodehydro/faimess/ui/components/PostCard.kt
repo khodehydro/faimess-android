@@ -110,44 +110,62 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             ExpandableCaption(post.caption, postId)
             Spacer(Modifier.height(13.dp))
             PlaylistPanel(postId, post.playlist, clicks.open)
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val likeDescription = stringResource(
-                    if (post.isLiked) R.string.unlike_post else R.string.like_post, author.name,
-                )
-                val likeState = stringResource(R.string.likes_state, post.likes)
-                EngagementButton(
-                    icon = if (post.isLiked) R.drawable.ic_heart else R.drawable.ic_heart_outline,
-                    label = compactCount(post.likes),
-                    description = likeDescription,
-                    iconColor = if (post.isLiked) Heart else Ink,
-                    onClick = clicks.like,
-                    modifier = Modifier.testTag("like_$postId").semantics { stateDescription = likeState },
-                )
-                Spacer(Modifier.width(4.dp))
-                EngagementButton(
-                    icon = R.drawable.ic_comment,
-                    label = compactCount(post.commentCount),
-                    description = stringResource(R.string.post_comments, author.name),
-                    onClick = clicks.comments,
-                )
-                Spacer(Modifier.weight(1f))
-                EngagementButton(
-                    icon = R.drawable.ic_send,
-                    label = compactCount(post.shares),
-                    description = stringResource(R.string.share_post, author.name),
-                    onClick = clicks.share,
-                    iconAfterText = true,
-                )
-            }
+            PostEngagementRow(post, clicks.like, clicks.comments, clicks.share, "like_$postId")
         }
     }
 }
 
+/**
+ * Likes, comments and shares exactly as the feed card draws them. The playlist page reuses the row
+ * so one like looks and behaves the same in both places; [likeTag] keeps the two instances apart.
+ */
 @Composable
-private fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit, onOptions: () -> Unit) {
+fun PostEngagementRow(
+    post: FeedPost,
+    onLike: () -> Unit,
+    onComments: () -> Unit,
+    onShare: () -> Unit,
+    likeTag: String,
+    modifier: Modifier = Modifier,
+) {
+    val author = post.author
+    Row(
+        modifier = modifier.fillMaxWidth().padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val likeDescription = stringResource(
+            if (post.isLiked) R.string.unlike_post else R.string.like_post, author.name,
+        )
+        val likeState = stringResource(R.string.likes_state, post.likes)
+        EngagementButton(
+            icon = if (post.isLiked) R.drawable.ic_heart else R.drawable.ic_heart_outline,
+            label = compactCount(post.likes),
+            description = likeDescription,
+            iconColor = if (post.isLiked) Heart else Ink,
+            onClick = onLike,
+            modifier = Modifier.testTag(likeTag).semantics { stateDescription = likeState },
+        )
+        Spacer(Modifier.width(4.dp))
+        EngagementButton(
+            icon = R.drawable.ic_comment,
+            label = compactCount(post.commentCount),
+            description = stringResource(R.string.post_comments, author.name),
+            onClick = onComments,
+        )
+        Spacer(Modifier.weight(1f))
+        EngagementButton(
+            icon = R.drawable.ic_send,
+            label = compactCount(post.shares),
+            description = stringResource(R.string.share_post, author.name),
+            onClick = onShare,
+            iconAfterText = true,
+        )
+    }
+}
+
+/** Avatar, name, time and the options button — the first row of a card and of the playlist page. */
+@Composable
+fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit, onOptions: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Row(
             Modifier.weight(1f).heightIn(min = 48.dp).clickable(role = Role.Button, onClick = onAuthor),

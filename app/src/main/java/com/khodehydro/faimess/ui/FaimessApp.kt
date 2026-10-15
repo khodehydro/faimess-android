@@ -112,7 +112,8 @@ fun FaimessApp(feedViewModel: FeedViewModel = viewModel()) {
     FaimessScaffold(
         state = state,
         tab = tab,
-        onTab = { tab = it },
+        // The menu stays visible on the playlist page; choosing any tab leaves the page.
+        onTab = { tab = it; openPlaylistPostId = null },
         homeListState = homeListState,
         interactions = interactions,
         onCreate = { sheet = FeedSheet.CreatePost },
@@ -200,20 +201,21 @@ private fun FaimessScaffold(
                     }
                 }
             }
+            // A playlist opens as a page over the current tab, under the floating menu; Back returns
+            // to where the user was. Other posts' playlists are offered further down the page.
+            openPlaylistPost?.let { post ->
+                val suggestions = remember(state.posts, post.id) { state.posts.filter { it.id != post.id }.take(6) }
+                PlaylistScreen(post, suggestions, interactions, onClosePlaylist, onPlay, Modifier.fillMaxSize())
+            }
             if (!keyboardVisible) {
                 FloatingNavigation(
                     tab, onTab,
                     Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
                 )
             }
-            // A playlist opens as a page over the feed and the menu; Back returns to where the user was.
-            openPlaylistPost?.let { post ->
-                PlaylistScreen(post, onClosePlaylist, interactions.onLike, onPlay, Modifier.fillMaxSize())
-            }
             SnackbarHost(
                 snackbar,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
-                    .padding(bottom = if (keyboardVisible) 8.dp else if (openPlaylistPost != null) 16.dp else 86.dp),
+                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 86.dp),
             )
         }
     }

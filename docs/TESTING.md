@@ -51,6 +51,7 @@ Use `gradlew.bat` instead on Windows. Tests are under `app/src/test` and `app/sr
 - Opening a playlist from its card: the page shows songs hidden behind "+n more tracks", Play reports that playback is not connected, back returns to the feed.
 - Liking on the playlist page updates the same like on the feed card (system Back closes the page).
 - Discover tiles open the same playlist page.
+- The playlist page's *more playlists* row swaps the page, its comments button opens the comments sheet, and the floating menu stays usable above the page.
 - Capture of the actual rendered home screen (`home.png`).
 
 ## GitHub Actions

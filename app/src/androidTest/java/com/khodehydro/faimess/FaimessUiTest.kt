@@ -138,7 +138,7 @@ class FaimessUiTest {
         compose.onNodeWithTag("playlist_sienna-drive").performClick()
         compose.onNodeWithTag("playlist_screen").assertIsDisplayed()
         // Neon Bloom is the fifth song: hidden behind "+2 more tracks" in the card, listed on the page.
-        compose.onNodeWithTag("playlist_screen").performScrollToNode(hasTestTag("track_nt4"))
+        compose.onNodeWithTag("playlist_list").performScrollToNode(hasTestTag("track_nt4"))
         compose.onNodeWithTag("track_nt4").assertIsDisplayed()
         compose.onNodeWithTag("playlist_play").performClick()
         compose.onNodeWithText(compose.activity.getString(R.string.playback_not_connected)).assertIsDisplayed()
@@ -165,6 +165,24 @@ class FaimessUiTest {
         compose.onNodeWithTag("playlist_screen").assertIsDisplayed()
         // The tile underneath still carries the same name; look only inside the page.
         compose.onNode(hasText("Comeback Countdown") and hasAnyAncestor(hasTestTag("playlist_screen"))).assertIsDisplayed()
+    }
+
+    @Test fun playlistPageOffersOtherPlaylistsAndItsComments() {
+        compose.onNodeWithTag("playlist_sienna-drive").performClick()
+        compose.onNodeWithTag("playlist_list").performScrollToNode(hasTestTag("suggestion_esther-rain"))
+        compose.onNodeWithTag("suggestion_esther-rain").performClick()
+        compose.onNode(hasText("Rainy Window") and hasAnyAncestor(hasTestTag("playlist_screen"))).assertIsDisplayed()
+        compose.onNodeWithTag("playlist_list").performScrollToNode(hasTestTag("playlist_comments"))
+        compose.onNodeWithTag("playlist_comments").performClick()
+        compose.onNodeWithTag("comment_input").assertIsDisplayed()
+    }
+
+    @Test fun menuStaysAvailableOnThePlaylistPage() {
+        compose.onNodeWithTag("playlist_sienna-drive").performClick()
+        compose.onNodeWithTag("playlist_screen").assertIsDisplayed()
+        compose.onNodeWithTag("nav_discover").performClick()
+        compose.onNodeWithTag("playlist_screen").assertDoesNotExist()
+        compose.onNodeWithTag("discover_screen").assertIsDisplayed()
     }
 
     @Test fun selectedTabUsesTheFilledIconAndSearchLivesOutsideTheMenu() {
