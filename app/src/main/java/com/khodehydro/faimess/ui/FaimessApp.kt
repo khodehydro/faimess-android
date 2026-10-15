@@ -11,9 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +21,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -33,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -267,26 +267,41 @@ private fun FaimessScaffold(
                     modifier = Modifier.fillMaxSize(),
                 )
             }
+            // Nav always renders so it can measure its width.
+            // When keyboard is visible it hides via the same old condition.
+            var navWidthPx by remember { mutableIntStateOf(0) }
+
             if (!keyboardVisible) {
-                // Two-row unit: mini player (top) + nav (bottom), same width.
-                // Column wraps to FloatingNavigation's width; MiniPlayer fillMaxWidth
-                // matches it exactly — one purple capsule, same width as nav.
-                Column(
-                    modifier = Modifier
+                // Mini player: one purple capsule, same width as nav.
+                // Positioned above the nav with bottom padding = nav height + gap.
+                if (playerState.hasTrack) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(bottom = 62.dp),
+                    ) {
+                        MiniPlayer(
+                            state = playerState,
+                            onTogglePlayPause = onMiniPlayerToggle,
+                            onNext = onMiniPlayerNext,
+                            onOpen = onOpenPlayer,
+                            modifier = if (navWidthPx > 0) {
+                                Modifier.width(with(LocalDensity.current) { navWidthPx.toDp() })
+                            } else Modifier,
+                        )
+                    }
+                }
+
+                FloatingNavigation(
+                    tab, onTab,
+                    Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .wrapContentSize(Alignment.BottomCenter),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    MiniPlayer(
-                        state = playerState,
-                        onTogglePlayPause = onMiniPlayerToggle,
-                        onNext = onMiniPlayerNext,
-                        onOpen = onOpenPlayer,
-                    )
-                    FloatingNavigation(tab, onTab)
-                }
+                        .onGloballyPositioned { navWidthPx = it.size.width },
+                )
             }
             SnackbarHost(
                 snackbar,
