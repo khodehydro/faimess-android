@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -122,6 +123,7 @@ fun FaimessApp(
             onOptions = { openPost(FeedSheet.PostMenu, it) },
             onOpen = { openPlaylistPostId = it },
             onAuthor = ::openPerson,
+            onPlayTrack = { track, playlist -> playTrack(track, playlist) },
         )
     }
 
@@ -265,12 +267,13 @@ private fun FaimessScaffold(
                 )
             }
             if (!keyboardVisible) {
-                // Mini player above the floating nav when a track is loaded
-                Box(
+                // Mini player + floating nav in a Column so they share the same width
+                Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 86.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MiniPlayer(
                         state = playerState,
@@ -278,15 +281,12 @@ private fun FaimessScaffold(
                         onNext = onMiniPlayerNext,
                         onOpen = onOpenPlayer,
                     )
+                    FloatingNavigation(tab, onTab)
                 }
-                FloatingNavigation(
-                    tab, onTab,
-                    Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
-                )
             }
             SnackbarHost(
                 snackbar,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 86.dp),
+                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = if (keyboardVisible) 8.dp else 100.dp),
             )
         }
     }

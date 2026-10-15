@@ -54,6 +54,7 @@ import com.khodehydro.faimess.R
 import com.khodehydro.faimess.model.FeedPost
 import com.khodehydro.faimess.model.Person
 import com.khodehydro.faimess.model.Playlist
+import com.khodehydro.faimess.model.Track
 import com.khodehydro.faimess.model.compactCount
 import com.khodehydro.faimess.ui.theme.Heart
 import com.khodehydro.faimess.ui.theme.Ink
@@ -71,6 +72,7 @@ data class PostInteractions(
     val onOptions: (String) -> Unit,
     val onOpen: (String) -> Unit,
     val onAuthor: (Person) -> Unit,
+    val onPlayTrack: (Track, List<Track>) -> Unit = { _, _ -> },
 )
 
 @Immutable
@@ -81,6 +83,7 @@ private data class PostClickActions(
     val options: () -> Unit,
     val open: () -> Unit,
     val author: () -> Unit,
+    val playTrack: (Track) -> Unit,
 )
 
 @Composable
@@ -95,6 +98,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             options = { interactions.onOptions(postId) },
             open = { interactions.onOpen(postId) },
             author = { interactions.onAuthor(author) },
+            playTrack = { track -> interactions.onPlayTrack(track, post.playlist.tracks) },
         )
     }
     Surface(
@@ -109,7 +113,7 @@ fun PostCard(post: FeedPost, interactions: PostInteractions, modifier: Modifier 
             Spacer(Modifier.height(9.dp))
             ExpandableCaption(post.caption, postId)
             Spacer(Modifier.height(13.dp))
-            PlaylistPanel(postId, post.playlist, clicks.open)
+            PlaylistPanel(postId, post.playlist, clicks.open, clicks.playTrack)
             PostEngagementRow(post, clicks.like, clicks.comments, clicks.share, "like_$postId")
         }
     }
@@ -189,7 +193,7 @@ fun PostAuthorHeader(author: Person, time: String, onAuthor: () -> Unit, onOptio
 
 /** The post's body: the shared playlist's name, facts and first songs. Tapping it opens the playlist. */
 @Composable
-private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Unit) {
+private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Unit, onPlayTrack: (Track) -> Unit) {
     val description = stringResource(R.string.open_playlist, playlist.name)
     val facts = playlistFacts(playlist)
     Column(
@@ -211,7 +215,7 @@ private fun PlaylistPanel(postId: String, playlist: Playlist, onClick: () -> Uni
             AppIcon(R.drawable.ic_play_circle, modifier = Modifier.size(36.dp), tint = Primary)
         }
         playlist.tracks.take(PREVIEW_TRACKS).forEachIndexed { index, track ->
-            TrackRow(index + 1, track, compact = true)
+            TrackRow(index + 1, track, compact = true, onClick = { onPlayTrack(track) })
         }
         val hidden = playlist.tracks.size - PREVIEW_TRACKS
         if (hidden > 0) {
