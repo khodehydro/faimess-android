@@ -495,14 +495,18 @@ private fun LyricsPanel(lines: List<LyricLine>?, positionSeconds: Int, onSeekSec
 @Composable
 private fun QueuePanel(state: PlayerState, onPlayAt: (Int) -> Unit) {
     val listState = rememberLazyListState()
-    LaunchedEffect(state.index) { if (state.index >= 0) listState.animateScrollToItem(state.index) }
+    val hasLabel = state.queueLabel.isNotBlank()
+    // Keep the song before the playing one in view too, so the list reads as "where we are".
+    LaunchedEffect(state.index, hasLabel) {
+        if (state.index >= 0) listState.animateScrollToItem((state.index - 1).coerceAtLeast(0) + if (hasLabel) 1 else 0)
+    }
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxWidth().height(PanelHeight).testTag("queue_panel"),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (state.queueLabel.isNotBlank()) {
+        if (hasLabel) {
             item(key = "label") {
                 Text(
                     stringResource(R.string.up_next_from, state.queueLabel),

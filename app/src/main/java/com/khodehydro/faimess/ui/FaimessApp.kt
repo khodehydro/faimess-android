@@ -299,11 +299,13 @@ private fun FaimessScaffold(
             if (playerOpen && nowPlaying != null) {
                 PlayerScreen(playerState, playerActions, onClosePlayer, Modifier.fillMaxSize())
             }
-            SnackbarHost(
-                snackbar,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
-                    .padding(bottom = if (keyboardVisible) 8.dp else 86.dp + (if (playerOpen) 0.dp else chromeExtra)),
-            )
+            // Above the menu (and the mini bar) normally; the player page has no menu under it.
+            val snackbarBottom = when {
+                keyboardVisible -> 8.dp
+                playerOpen && nowPlaying != null -> 16.dp
+                else -> 86.dp + chromeExtra
+            }
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = snackbarBottom))
         }
     }
 }

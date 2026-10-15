@@ -50,7 +50,7 @@ Use `gradlew.bat` instead on Windows. Tests are under `app/src/test` and `app/sr
 - All five navigation destinations; the selected tab is the only one marked selected, and Search lives outside the capsule.
 - Search empty state and clearing the query.
 - Opening a playlist from its card: the page shows songs hidden behind "+n more tracks", Play starts the first song in the mini player, back returns to the feed with the mini player still there.
-- Tapping a song on the playlist page: the mini player shows it, pause/resume toggles its label, tapping the bar opens the full player with the title, the `Song 2 of 6` queue pill and the bilingual lyric sheet; next, like and repeat update their labels; the *Up next* tab jumps to another song; Back collapses the player and the mini player keeps playing.
+- Tapping a song on the playlist page: the mini player shows it, pause/resume toggles its label, tapping the bar opens the full player with the title, the `Song 2 of 6` queue pill and the bilingual lyric sheet; the *Up next* tab jumps back to the first song (`Song 1 of 6`), next advances, repeat and like update their labels and unliking shows its snackbar; Back collapses the player and the mini player keeps playing.
 - The feed card's play glyph starts the playlist without leaving the feed; the mini player's next button advances it.
 - Liking on the playlist page updates the same like on the feed card (system Back closes the page).
 - Discover tiles open the same playlist page.

@@ -168,19 +168,24 @@ class FaimessUiTest {
         compose.onNodeWithTag("lyrics_panel").performScrollToNode(hasText("해가 진 뒤에도 남아 있는 빛"))
         compose.onNode(hasText("نوری که بعد از غروب هم می‌مونه")).assertExists()
 
-        compose.onNodeWithTag("player_next").performClick()
-        compose.onNodeWithTag("player_title").assertTextEquals("Silver Hour")
-        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Save to Liked songs").performClick()
-        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Remove from Liked songs")
-        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat off").performClick()
-        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat all")
-
+        // "Up next" lists the queue; tapping the first song jumps back to it.
         compose.onNodeWithTag("tab_queue").performClick()
         compose.onNodeWithTag("queue_nt2").performScrollTo().performClick()
         compose.onNodeWithTag("player_title").assertTextEquals("Midnight Seoul")
+        compose.onNodeWithTag("player_queue_pill").assertContentDescriptionEquals("Song 1 of 6")
+        compose.onNodeWithTag("player_next").performClick()
+        compose.onNodeWithTag("player_title").assertTextEquals("Afterglow")
+
+        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat off").performClick()
+        compose.onNodeWithTag("player_repeat").assertContentDescriptionEquals("Repeat all")
+        // Afterglow is one of the site's seeded likes; unliking confirms with a snackbar.
+        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Remove from Liked songs").performClick()
+        compose.onNodeWithTag("player_like").assertContentDescriptionEquals("Save to Liked songs")
+        compose.onNodeWithText("Removed from Liked songs").assertIsDisplayed()
+
         Espresso.pressBack()
         compose.onNodeWithTag("player_screen").assertDoesNotExist()
-        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Midnight Seoul"))
+        compose.onNodeWithTag("mini_player").assertIsDisplayed().assert(hasText("Afterglow"))
     }
 
     @Test fun theFeedCardsPlayGlyphStartsThePlaylistWithoutLeavingTheFeed() {
